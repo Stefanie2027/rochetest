@@ -1,0 +1,5676 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMzg2ODk4MDg1NzU1MTkxNDY0OSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2Y2ZWZkOTg2N2RiOTBkMzFfaW5kZXguaHRtbC03NzEifSwiZXhwIjoxNzkzNjI5ODYxLCJpYXQiOjE3OTM2MjYyNjEsImFsZyI6IlJTMjU2In0.Fg356_tP-7YNE_YulNDbAdfuGkDRIoT_OCUhKXKhC0lnhfi2m3_dI-RvHuh91_p2EvXk47cGlBkEz1BaZlB6as8Ocawg4HWEQgnXsldrePZdPgXtoM4ufAfRe4sc5wGmdW4GG37JRzmv_cU3_HtI6ktzP0WmQ-EM0eVpwjhY-Ei2u02z5y9UM8HYWpHJ3qmOyRbASCBrptIOmDN1lcLIZ87qQN2fBkxtgQupyqDGCE7nrXE-uPgCLSdPGMxLefC0F1dkhSurHh7kj1nN3Xe7VS10cMUopPW1ekSiuY7LuKgFm-XAxcOOSCI7fzSdeZFW_yxHYVkuNLUvvwMqWUEoGg","c_f6efd9867db90d31_index.html-771")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>罗氏题库在线测评系统</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js 用于生成二维码 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
+  <!-- SheetJS 用于高精度解析 Excel 题库 -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .phone-container {
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 10px #0f172a;
+    }
+    .page-slide-enter {
+      animation: slideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .shake-anim {
+      animation: shake 0.35s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.invisible{visibility:hidden}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-10{bottom:2.5rem}.left-1\/2{left:50%}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-2{margin-top:0.5rem;margin-bottom:0.5rem}.my-3{margin-top:0.75rem;margin-bottom:0.75rem}.my-auto{margin-top:auto;margin-bottom:auto}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-2\.5{margin-bottom:0.625rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-1{margin-left:0.25rem}.ml-2{margin-left:0.5rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-20{height:5rem}.h-24{height:6rem}.h-3{height:0.75rem}.h-5{height:1.25rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-\[100dvh\]{height:100dvh}.h-full{height:100%}.h-6{height:1.5rem}.max-h-44{max-height:11rem}.max-h-72{max-height:18rem}.max-h-\[75\%\]{max-height:75%}.min-h-screen{min-height:100vh}.w-0{width:0px}.w-12{width:3rem}.w-20{width:5rem}.w-24{width:6rem}.w-28{width:7rem}.w-5{width:1.25rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.w-px{width:1px}.w-6{width:1.5rem}.max-w-\[430px\]{max-width:430px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.space-x-1 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.25rem * var(--tw-space-x-reverse));margin-left:calc(0.25rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.375rem * var(--tw-space-x-reverse));margin-left:calc(0.375rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.625rem * var(--tw-space-x-reverse));margin-left:calc(0.625rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-none{border-radius:0px}.rounded-xl{border-radius:0.75rem}.rounded-t-\[32px\]{border-top-left-radius:32px;border-top-right-radius:32px}.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-400{--tw-border-opacity:1;border-color:rgb(96 165 250 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-200\/70{border-color:rgb(226 232 240 / 0.7)}.border-slate-200\/80{border-color:rgb(226 232 240 / 0.8)}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255 / var(--tw-border-opacity, 1))}.border-slate-200\/90{border-color:rgb(226 232 240 / 0.9)}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-50\/70{background-color:rgb(239 246 255 / 0.7)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-blue-700{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-50\/70{background-color:rgb(236 253 245 / 0.7)}.bg-emerald-50\/90{background-color:rgb(236 253 245 / 0.9)}.bg-rose-600{--tw-bg-opacity:1;background-color:rgb(225 29 72 / var(--tw-bg-opacity, 1))}.bg-slate-100\/90{background-color:rgb(241 245 249 / 0.9)}.bg-slate-300{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/60{background-color:rgb(15 23 42 / 0.6)}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-blue-600{--tw-gradient-from:#2563eb var(--tw-gradient-from-position);--tw-gradient-to:rgb(37 99 235 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-700{--tw-gradient-from:#1d4ed8 var(--tw-gradient-from-position);--tw-gradient-to:rgb(29 78 216 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-50{--tw-gradient-from:#f8fafc var(--tw-gradient-from-position);--tw-gradient-to:rgb(248 250 252 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-indigo-600{--tw-gradient-to:rgb(79 70 229 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #4f46e5 var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-emerald-500{--tw-gradient-to:#10b981 var(--tw-gradient-to-position)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-teal-400{--tw-gradient-to:#2dd4bf var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.to-white{--tw-gradient-to:#fff var(--tw-gradient-to-position)}.p-0{padding:0px}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-3\.5{padding:0.875rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-2{padding-bottom:0.5rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.pr-2{padding-right:0.5rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.leading-snug{line-height:1.375}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-blue-500\/20{--tw-shadow-color:rgb(59 130 246 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-blue-500\/25{--tw-shadow-color:rgb(59 130 246 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-blue-600\/25{--tw-shadow-color:rgb(37 99 235 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-blue-600\/30{--tw-shadow-color:rgb(37 99 235 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-500\/25{--tw-shadow-color:rgb(16 185 129 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/20{--tw-shadow-color:rgb(5 150 105 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-rose-600\/25{--tw-shadow-color:rgb(225 29 72 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:border-blue-600:hover{--tw-border-opacity:1;border-color:rgb(37 99 235 / var(--tw-border-opacity, 1))}.hover\:border-slate-300:hover{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.hover\:bg-black:hover{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-800:hover{--tw-bg-opacity:1;background-color:rgb(30 64 175 / var(--tw-bg-opacity, 1))}.hover\:bg-rose-700:hover{--tw-bg-opacity:1;background-color:rgb(190 18 60 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-900:hover{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.hover\:from-blue-800:hover{--tw-gradient-from:#1e40af var(--tw-gradient-from-position);--tw-gradient-to:rgb(30 64 175 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-emerald-700:hover{--tw-gradient-from:#047857 var(--tw-gradient-from-position);--tw-gradient-to:rgb(4 120 87 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-indigo-700:hover{--tw-gradient-to:#4338ca var(--tw-gradient-to-position)}.hover\:to-teal-700:hover{--tw-gradient-to:#0f766e var(--tw-gradient-to-position)}.hover\:text-blue-600:hover{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.hover\:text-rose-500:hover{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.hover\:text-rose-600:hover{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.hover\:text-slate-600:hover{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.hover\:shadow:hover{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-blue-500:focus{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-\[0\.98\]:active{--tw-scale-x:0.98;--tw-scale-y:0.98;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:grid-cols-7{grid-template-columns:repeat(7, minmax(0, 1fr))}}@media (min-width: 768px){.md\:mb-0{margin-bottom:0px}.md\:mr-8{margin-right:2rem}.md\:h-\[844px\]{height:844px}.md\:w-96{width:24rem}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:rounded-\[48px\]{border-radius:48px}.md\:p-6{padding:1.5rem}.md\:p-5{padding:1.25rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 1024px){.lg\:w-\[420px\]{width:420px}.lg\:p-8{padding:2rem}}</style></head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row justify-center items-stretch md:items-center p-0 md:p-6 lg:p-8">
+
+  <!-- 桌面控制台与二维码面板（手机微信扫码进入会自动隐藏） -->
+  <aside id="desktopPanel" class="w-full md:w-96 lg:w-[420px] bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 flex flex-col justify-between mb-6 md:mb-0 md:mr-8 transition-all shrink-0">
+    <div>
+      <!-- 头部介绍 -->
+      <div class="flex items-center space-x-3 mb-5 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+          <i class="fa-solid fa-file-excel text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-lg flex items-center">
+            罗氏题库答题系统
+            <span id="bankSourceTag" class="ml-2 text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">已载入真实题库(179题)</span>
+          </h1>
+          <p class="text-xs text-slate-500">微信扫码答题 · 单题单页 · 即时正解与解析</p>
+        </div>
+      </div>
+
+      <!-- 统计指标 -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3 text-center">
+          <span class="block text-2xl font-black text-blue-700" id="sidebarQuestionCount">179</span>
+          <span class="text-xs text-blue-600 font-medium">当前题库总数</span>
+        </div>
+        <div class="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-3 text-center">
+          <span class="block text-2xl font-black text-emerald-700">单题单页</span>
+          <span class="text-xs text-emerald-600 font-medium">提交即显答案</span>
+        </div>
+      </div>
+
+      <!-- 二维码展示区 -->
+      <div class="bg-gradient-to-b from-slate-50 to-white rounded-2xl p-4 border border-slate-200 text-center relative overflow-hidden">
+        <div class="inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 mb-2.5">
+          <i class="fa-brands fa-weixin text-emerald-600 text-sm"></i>
+          <span>微信扫一扫 · 手机即刻作答</span>
+        </div>
+
+        <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 inline-block mx-auto mb-2">
+          <div id="qrcode" class="flex justify-center items-center" title="https://stefanie2027.github.io/exam/?mode=quiz&amp;autostart=1"><canvas width="140" height="140" style="display: none;"></canvas><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAACMCAYAAACuwEE+AAAMb0lEQVR4AeyaUXIbSQ5EFb7H7u/cZvesc5vd37nIzKTC6XkNVVajSUqWTDgMIQtIANUgAjQpf/vXf/7356PlT/xhbphfIX0d/Br0/UeHXznfQ19V9fn86jz5Ya40qTpTdj7yVpixCdc48qrvUedvL/NnOnChAzMwF5o11JeXw8D88ftvL7dKp5n//u//XygpJt3hnljlZD2dLbSzRsKJ73zW5HWw46QTn3cSj5JiyLmKa87DwFTnnKcDtQMzMLUjc952IA4MV1/C28zfnd0V+J3+qlK9Tq7XBI0frJHoqV7iM2fFzJXiP8Je77U67+4RB2YX9DN8U/NzdGAG5nO8Dl/mFu8+MKuVZ1vqUmd9O4c08+hsoV3YdmmdLffUY+wOq6aFPN+hanOlq89n+Si2v6d+94F5z8tP7o/vwAzMx/f8S1f80IHhKhbmOtXZwo7aJt2xk9PFvAdjkp0cYvKF6SOWz6LnstgmbZu0zhbm+Rn4QwfmZzzg1HxsB2ZgHtvPl5dfPF8cGK3CM7naG69Va8bbJn2PnbFdfPac8jOXzhbd10JOxeZL0+dY6WRXTEcYn/C9eeLApIJjf+4OzMA89+t/+ekPA6O1eKt0Ktd1yBj6eIdH2ZWTuVibWDwL7R3M/MLOI53ixbOQY5u04i3k2GZNH7H9t2jmET4MjAwj04FdB2Zgdt0Z35sOfNPKe7SwCnPTLrzzyS/hGtXZkuz2SzO/8NUY5VhJJ88qbmXr5NLdLeTbZs38tmV92/+unA3DLg8+7cAMzGmLhsAOtAaGa5DBxB0O+cKMIeYaFW8l5BCTy5zCXZ64VZj3XpzuQTvrsx45tO8wcyXM+MSRvTUwTDb4uTswA/Pcr//lp/+mNWNhtG3SHXtalYpPwryMJ592YnKImbPixGPehJmLHNpvwY/MdUv9qzGzYa527Mn5P2FgnrzjX/zxZ2C++Av40dc/fNObiqf3Wf6bIOEUq1r0MT7ZE4d85bXQLmz7TrMGeYq30L7D5kvvePaxtmIstO+w81TtPFVXns/k2WY9G8adGN3qwAxMq01DcgfiwHAtcQ06sGryq89ncoRT3mR3nqrJJ648nlXfkuzdXIwnZjwxOcS+j3Syy2chR5g1iOWzJLv9VbuWdRyYGjjn6YA6MAOjLqxlrIsOHL7p5boiXsS9MXX45Ah7ze00C5GneAvt5Ntv3eWt+LZJs0bKKQ59xMphEc9iW9X2S9PHnBWLa2GMbTu948+G2XVufG86MAPzpiVj2HWg9cUdE9TVd3bmeqtc+lgjYfKZi3bGkiNMH2Pks3Q4jE18coTJcy1p+SzkENsvrRgLOcLyW8ypWryVOE6aMTpTZsOsuje22IEZmNiacaw6cBgYriLiVaBsXFUJi2epHNulq89n+SzpTrQTO8dKO2dXM0eqUXN1eTVOZ8YSy2fxnaxtl7at6pRLMRbGkC98GBgHjJ4OpA7MwKTOjH3ZgcMXd2RwLXXsWlcW8j8C867Et9T2M1TNXN0a5DFfsqca5JPDnMLJRztzKeZMGCs8G0ZdGGl3YAam3aohqgMP++KOq06J30NYg5i1zlas/YxJmDUct9M1D7n0JXvikM87kd/FV3OxnvBsmG6nh/fagbsG5jXD/HiqDhw+JWnlWNgFrjHaicm5FzMvMfMmu+8vTY6wbBbmsq1qxVjos+2KZjzxlRzi8t46J2GNTgz5xIwVng2TOj72ZQdmYJZtGWPqQOtTEldUB7MY+bTvsFbfShhD/y01bolx/W4sebyv81Td4dSYdO7kIoeYOfkMwrNh2J3Bpx2YgTlt0RDYgecYGD7x4Ls6cPhYzfcx4lSBHOLE13sgJfE69pRndw/6Orhzjy6H92VtxpNDnDi0V5ziK+/szLsKz4Y569j4Dx2YgTm0Yw5nHTh8rOYaI05JyEk4xcrOGJ1XQg6x1uNKVjlWNuZKeBUnG+syVj4KecSMISaHmDmJGStMH7F8Z0L+rvZsGHZq8GkHZmBOWzQEdiB+SiIprSjaE2aeLub6ZAxrJA75FacY5k245lqdayzrEZN3zPPPifx/rC8vu1j6EmauhFm74tkwqWtjX3ZgBmbZljGmDhw+JZHElca1RA5xh0O+MGvofCadGuRU3KnHmLP7yM+cjBWmT1yLfBZybJNOduc408phSVzWICfZxZkNoy6MtDswA9Nu1RDVgcOnJK+wqkU8k90aS7G1js/kp7zJnmLFpy9h8SyJQ7vvLE37Dju/tOIsu5irPuW2XI31faSdw3o2zNVuPjn/+8A8eRfm8dsdOAyM1440M+hsoV0r60zIr9g5qyaP+ZOdHOYiX5g8nS20J2yuNDk6W1hbOPHMr1oxFvpsk6a9YtZLuMaszqpjqf7DwFTnnKcDtQMzMLUjc9524PDFHdcYo5Lda+tWzRrEzEf7Vcx7CzP+ag3yiZlTNSjkEScO7cybMHMKJ95VO+9R8WyYq918cv4MzJMPwNXHP3xxp7V2RVisrq7Vmfxb8B+///bj1/spnnXrszCGPNprjM+Jv4tNMc4pnTjM2+GIr3wrkW8lzEtMbs03G4bdGXzagRmY0xYNgR2IA8MVlTATcXV17OIwr85nQv4t9Zg/xZOTMO+ROLKnGoxPHMVfFeYlZo2rmHmE48Bcvezwn6MDMzDP8To/7ClnYB7WyudIFL/pTe91bIve01bS4SiONRhDfA9HNSjMS8waV/nMw1jh5KM9YcVbEqdrd56qO/HsjfBsmE7XhvOjAzMwP1oxoNOBODBcX51EWlcr2cWyBnGKYX5yGEtMThenGime/IoZU30+k0Nsf9Xk8FmFySWPdmLFWMi3TZp24Tgwco5MB2oHZmBqR+a87UDrl49aTRauNGa2v2pyGCtMXwfX3D53YsVRTYvOZ+L80uTqbKF9h82vOsWQR06yi7PzyS8hx72Qpl08C+3Cs2HcmWfVF597BuZiw56dHgdG68eilWVhw2yrOnGcz5pxjLFfmvbET3bGCivfSuRbSScv861yrGydvImT7Ks6V2wpL+3CcWCuFBvu83RgBuZ5XuuHPGn8XRKzc+0SJ45Wl4V826wZb5s07YwnThzalSsJeZ28zMNY2plHOPFoJ2Yu2omV10K+MHk6W8yXtk1aZwtjie23ng3D7gw+7cAMzGmLhsAOtL64Y4BWmcVrSto2afIj/tuhOMvfxx9/lcPyw7gB5kqT5twrLe5KGE/MHIyjnfyPwKwtnGryvuRctSt2Noy6MNLuwAxMu1VDVAcOn5JkWAlXl1afJdlXOWRznDXj5T8T8okZl+zi0Oc7SMt3Jow949qv3Gdi7k4zR/cejCFOdTocxc6GURdG2h2YgWm3aojqwGFguJYSVtBKuCoZSy45wvQRp3hyiMknJqdi1bfQx3j7pcm5BSuHhfGsl+yOk058xcq/EvlWwlyMo73GHQamOuesDoywAzMw7Mbg0w5c/uIuZeQa43ojJkc45bpqZw3G0i5Mn+qv5CpHeS2MFbZdWucz4X3IpV25LOQIk0csnyXZ7Zd2/pWeDaMOjbQ7MAPTbtUQ1YEZGHVhpN2By9/08n2NVZKd75nkCDN+xxNXQv4tmDUYr9xnQn7KQ45w4rGWeCvpcGocYxKuMT6nu9IuPBvGHfv6+kOeYAbmQ9r86xQ5fKzWynmEsD1cjbvcjCGPdmJyiMmpmHepPp87uVIe2oWds6sVY2GMbdK07/A9z8FY1aTMhtl1fXxvOjAD86YlY9h14DAwXD1X8a5I8rFG4nA9EjOWmHnIF6Yv4ZQr8WlXDcrOZx7r2SbN2Fsw83biE193oRwGppN4OM/dgRmY5379Lz99HBiuoYS/V3uI4kokZvJkTxzyhfkcjKE9YfI/GnfvlHi0d+6uXlkqPw5MJc55OqAOzMCoCyPtDrz7wHAdes1Z05dubK50h09OxcqxEtamn/aEWSNxqj3VuGqvedM55eXdiZmHscLvPjAsPvjrd2AG5uu/hh/6BO8+MFpjlu6TcT0SM552YtdaafKIU17aE17VObPdU5u5051k7/DIIVa8hXcVfveBceHPoOcO93dgBub+Hj5VhjgwXFEJX+2UVhqF8cnO2uQTdzjik5eweBZybJNOd5WPQh5x4rAe+QmTXzFr3INr3jgw9xSZ2F+3AzMwv+5r+y5PdhiYtPo69ltuV9fd6sza9LMeOcTkCO988t8iu5zpvqzT4ZBPzNpdnOI7dnEOAyPDyHRg14EZmF13fpbvE9edgfnEL85nvNpfAAAA//+2v6mVAAAABklEQVQDAHGVD1x7fNecAAAAAElFTkSuQmCC" style="display: block;"></div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mb-3">支持微信群或移动设备直接扫码进入</p>
+
+        <div class="flex items-center gap-2">
+          <button id="downloadQrBtn" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-sm hover:shadow transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-download"></i>
+            <span>保存二维码</span>
+          </button>
+          <button id="copyUrlBtn" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-1.5">
+            <i class="fa-regular fa-copy"></i>
+            <span>复制答题网址</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 网址设置 -->
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between text-xs text-slate-500 mb-1.5">
+          <span class="font-medium">您的 GitHub 发布网址</span>
+          <span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">已绑定</span>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="targetUrlInput" value="https://stefanie2027.github.io/exam/" class="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-blue-500 font-mono">
+          <button id="updateUrlBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-medium shrink-0">更新</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部题库上传与一键固化导出（核心功能） -->
+    <div class="mt-5 pt-4 border-t border-slate-100 space-y-2.5">
+      <!-- 上传附件按钮 -->
+      <label class="w-full py-3 border-2 border-dashed border-blue-400 hover:border-blue-600 bg-blue-50/70 hover:bg-blue-50 rounded-2xl flex items-center justify-center space-x-2 cursor-pointer transition text-xs text-blue-700 font-bold shadow-sm">
+        <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-base"></i>
+        <span>重新导入 Excel 题库表格</span>
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
+      </label>
+
+      <!-- 导出固化代码按钮：直接把内存里的 179 题刻录生成 index.html -->
+      <button id="exportEmbeddedHtmlBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold transition flex items-center justify-center space-x-2 shadow-md shadow-emerald-600/20">
+        <i class="fa-solid fa-download text-sm"></i>
+        <span>下载永久内置题库的 index.html</span>
+      </button>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <span>已支持本地持久化存储</span>
+        <button id="resetToDefaultBtn" class="hover:text-rose-500 transition underline">清除缓存</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 手机端界面模拟器容器（移动端微信扫码进入时自动 100% 满屏） -->
+  <main id="mobileViewport" class="phone-container w-full max-w-[430px] h-[100dvh] md:h-[844px] bg-slate-50 rounded-none md:rounded-[48px] overflow-hidden flex flex-col relative shrink-0">
+
+    <!-- 仿真微信小程序胶囊导航栏 -->
+    <header class="bg-white border-b border-slate-100 px-4 pt-4 pb-3 flex items-center justify-between shrink-0 select-none z-20">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-blue-700 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+          <i class="fa-solid fa-file-lines text-[11px]"></i>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-slate-900 leading-tight">罗氏题库测评</span>
+          <span class="text-[10px] text-slate-400" id="headerSubtitle">共 179 道题 · 即时正解</span>
+        </div>
+      </div>
+      <!-- 小程序标准胶囊按钮 -->
+      <div class="flex items-center bg-slate-100/90 border border-slate-200 rounded-full px-2.5 py-1 space-x-2 text-slate-600 text-xs">
+        <button id="toggleSheetBtn" title="查看题卡" class="hover:text-blue-600 flex items-center space-x-1">
+          <i class="fa-solid fa-table-cells text-[11px]"></i>
+          <span class="text-[10px] font-bold" id="cardNavNumber">1/179</span>
+        </button>
+        <span class="h-3 w-px bg-slate-300"></span>
+        <button id="headerRestartBtn" title="重新开始" class="hover:text-rose-600"><i class="fa-solid fa-rotate-right text-[11px]"></i></button>
+      </div>
+    </header>
+
+    <!-- 答题进度条 -->
+    <div id="quizProgressBar" class="w-full bg-slate-100 h-1.5 relative overflow-hidden shrink-0">
+      <div id="progressFill" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 h-full w-0 transition-all duration-300" style="width: 0.558659%;"></div>
+    </div>
+
+    <!-- 核心视图容器 -->
+    <div class="flex-1 relative overflow-y-auto custom-scrollbar p-4 flex flex-col">
+
+      <!-- ================= 视图 1：测评欢迎首页 ================= -->
+      <section id="viewHome" class="flex-1 flex flex-col justify-between py-2 page-slide-enter hidden">
+        <div class="text-center pt-4">
+          <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-500/25 mb-4">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <span class="inline-block bg-blue-50 text-blue-700 font-bold text-xs px-3 py-1 rounded-full mb-2">Roche Examination</span>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight" id="homeMainTitle">罗氏业务知识考核测评</h2>
+          <p class="text-xs text-slate-500 mt-1.5 px-4" id="homeDescText">每页一道题 · 提交即刻显示正确答案与考点精解</p>
+        </div>
+
+        <!-- 答题规范卡片 -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3.5 my-auto">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-circle-info text-blue-600 mr-2 text-sm"></i>
+              考核规则说明
+            </h3>
+            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium" id="homeVersionTag">题库就绪</span>
+          </div>
+
+          <div class="space-y-3 text-xs text-slate-600">
+            <div class="flex items-start space-x-2.5">
+              <span class="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-[11px] font-bold">1</span>
+              <span><strong>单题单屏：</strong>每页一道题，专注思考作答。</span>
+            </div>
+            <div class="flex items-start space-x-2.5">
+              <span class="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-[11px] font-bold">2</span>
+              <span><strong>提交显正解：</strong>提交后立即高亮正确答案，并给出官方详细解析。</span>
+            </div>
+            <div class="flex items-start space-x-2.5">
+              <span class="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-[11px] font-bold">3</span>
+              <span><strong>成绩与错题：</strong>交卷后生成成绩单与错题专项复练。</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="grid grid-cols-3 gap-2 text-center mb-4">
+          <div class="bg-white p-3 rounded-2xl border border-slate-200/70">
+            <span class="block text-xl font-black text-slate-800" id="homeTotalCount">179</span>
+            <span class="text-[10px] text-slate-400">试题总数</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-slate-200/70">
+            <span class="block text-xl font-black text-blue-600">100</span>
+            <span class="text-[10px] text-slate-400">满分分值</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-slate-200/70">
+            <span class="block text-xl font-black text-emerald-600">即时</span>
+            <span class="text-[10px] text-slate-400">答案解析</span>
+          </div>
+        </div>
+
+        <button id="startQuizBtn" class="w-full py-4 bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-800 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-600/30 active:scale-[0.98] transition flex items-center justify-center space-x-2 text-sm">
+          <span>开始测评（共 <span id="startBtnCount">179</span> 题）</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </section>
+
+      <!-- ================= 视图 2：单题单页答题与即时正解页 ================= -->
+      <section id="viewQuiz" class="flex-1 flex flex-col justify-between py-1 page-slide-enter">
+        <div class="space-y-4">
+          <!-- 题号与状态 -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span id="questionTypeBadge" class="bg-blue-100 text-blue-700 font-bold text-[11px] px-2.5 py-0.5 rounded-full">单选题</span>
+              <span id="questionStepText" class="text-xs font-semibold text-slate-500">第 1 / 179 题</span>
+            </div>
+            <span id="instantStatusBadge" class="text-[11px] font-bold hidden px-2.5 py-0.5 rounded-full"></span>
+          </div>
+
+          <!-- 试题题干 -->
+          <div class="bg-white rounded-3xl p-4 md:p-5 border border-slate-200/80 shadow-sm">
+            <h3 id="questionTitle" class="text-sm md:text-base font-bold text-slate-900 leading-relaxed">药师协助患者支付指引时，以下哪种行为是合规的？</h3>
+          </div>
+
+          <!-- 选项列表 -->
+          <div id="optionsContainer" class="space-y-2.5"><button class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-white border-slate-200/90 text-slate-700 hover:border-slate-300" data-key="A">
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-slate-100 text-slate-600">A</span>
+            <span class="opt-text leading-snug">承诺理赔结果</span>
+          </div>
+          <div class="opt-icon-status shrink-0 text-base">
+            <i class="fa-regular fa-circle text-slate-300"></i>
+          </div>
+        </button><button class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-white border-slate-200/90 text-slate-700 hover:border-slate-300" data-key="B">
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-slate-100 text-slate-600">B</span>
+            <span class="opt-text leading-snug">替患者填写全部申请材料</span>
+          </div>
+          <div class="opt-icon-status shrink-0 text-base">
+            <i class="fa-regular fa-circle text-slate-300"></i>
+          </div>
+        </button><button class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-white border-slate-200/90 text-slate-700 hover:border-slate-300" data-key="C">
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-slate-100 text-slate-600">C</span>
+            <span class="opt-text leading-snug">仅提供流程咨询和文件准备支持</span>
+          </div>
+          <div class="opt-icon-status shrink-0 text-base">
+            <i class="fa-regular fa-circle text-slate-300"></i>
+          </div>
+        </button><button class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-white border-slate-200/90 text-slate-700 hover:border-slate-300" data-key="D">
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-slate-100 text-slate-600">D</span>
+            <span class="opt-text leading-snug">解读保险条款的模糊内容</span>
+          </div>
+          <div class="opt-icon-status shrink-0 text-base">
+            <i class="fa-regular fa-circle text-slate-300"></i>
+          </div>
+        </button></div>
+
+          <!-- 即时显示的官方正确答案与考点精解面板（提交后呈现） -->
+          <div id="instantAnalysisBox" class="bg-emerald-50/90 border border-emerald-200 rounded-3xl p-4 hidden page-slide-enter">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-emerald-800">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                <span>正确答案：<span id="correctAnswerKey" class="text-base font-black underline ml-1"></span></span>
+              </div>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">官方解析</span>
+            </div>
+            <p id="analysisContent" class="text-xs text-slate-700 leading-relaxed bg-white/80 rounded-2xl p-3 border border-emerald-100">
+              解析内容加载中...
+            </p>
+          </div>
+        </div>
+
+        <!-- 底部主操作区 -->
+        <div class="pt-4 pb-2 space-y-2">
+          <!-- 状态一：提交当前题目 -->
+          <button id="submitAnswerBtn" class="w-full py-3.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-2xl shadow-md shadow-blue-600/25 active:scale-[0.98] transition flex items-center justify-center space-x-2 text-sm">
+            <i class="fa-solid fa-check"></i>
+            <span>确认提交并查看答案</span>
+          </button>
+
+          <!-- 状态二：下一题（提交后显示） -->
+          <button id="nextQuestionBtn" class="w-full py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-md active:scale-[0.98] transition hidden items-center justify-center space-x-2 text-sm">
+            <span id="nextBtnText">进入下一题</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <!-- 上一题快捷辅助 -->
+          <button id="prevQuestionBtn" class="w-full py-2 text-slate-400 hover:text-slate-600 text-xs font-medium transition flex items-center justify-center space-x-1 invisible">
+            <i class="fa-solid fa-chevron-left text-[10px]"></i>
+            <span>查看上一题</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= 视图 3：答题结算与成绩单 ================= -->
+      <section id="viewResult" class="flex-1 flex flex-col justify-between py-2 hidden page-slide-enter">
+        <div class="text-center pt-3">
+          <div id="resultScoreBadge" class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex flex-col items-center justify-center text-white shadow-xl shadow-emerald-500/25 mb-3 border-4 border-white">
+            <span id="finalScoreText" class="text-3xl font-black leading-none">100</span>
+            <span class="text-[10px] font-semibold tracking-wider uppercase mt-1">最终得分</span>
+          </div>
+          <h2 id="resultEvaluationTitle" class="text-lg font-black text-slate-900">全卷测评完成</h2>
+          <p id="resultSubtitle" class="text-xs text-slate-500 mt-1">作答数据统计已生成</p>
+        </div>
+
+        <!-- 统计指标卡 -->
+        <div class="grid grid-cols-3 gap-2 my-3">
+          <div class="bg-white rounded-2xl p-3 border border-slate-200/80 text-center">
+            <span class="block text-base font-black text-blue-600" id="statTotalCount">0</span>
+            <span class="text-[10px] text-slate-400">总题数</span>
+          </div>
+          <div class="bg-white rounded-2xl p-3 border border-slate-200/80 text-center">
+            <span class="block text-base font-black text-emerald-600" id="statCorrectCount">0</span>
+            <span class="text-[10px] text-slate-400">答对</span>
+          </div>
+          <div class="bg-white rounded-2xl p-3 border border-slate-200/80 text-center">
+            <span class="block text-base font-black text-rose-600" id="statWrongCount">0</span>
+            <span class="text-[10px] text-slate-400">错题</span>
+          </div>
+        </div>
+
+        <!-- 全量作答气泡图谱 -->
+        <div class="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm flex-1 flex flex-col mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-chart-pie text-blue-600 mr-1.5"></i>
+              作答分布图谱（点击题号回看）
+            </span>
+            <span class="text-[10px] text-slate-400">绿: 正确 | 红: 错误</span>
+          </div>
+          <div id="answerSheetDots" class="grid grid-cols-6 sm:grid-cols-7 gap-1.5 overflow-y-auto custom-scrollbar p-1 max-h-44">
+            <!-- 动态生成圆圈 -->
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="space-y-2">
+          <button id="retryWrongOnlyBtn" class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl shadow-md shadow-rose-600/25 active:scale-[0.98] transition flex items-center justify-center space-x-2 text-sm hidden">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>专项重做错题 (<span id="wrongCountLabel">0</span>)</span>
+          </button>
+
+          <button id="restartAllBtn" class="w-full py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-2xl shadow-md active:scale-[0.98] transition flex items-center justify-center space-x-2 text-sm">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>重新作答全卷</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 弹窗：题卡快速跳转抽屉 -->
+    <div id="sheetModal" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs z-30 hidden flex flex-col justify-end transition-opacity">
+      <div class="bg-white rounded-t-[32px] p-5 max-h-[75%] flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h4 class="font-bold text-sm text-slate-800">试题快速跳转卡</h4>
+            <p class="text-[11px] text-slate-400">点击题号快速跳至对应页面</p>
+          </div>
+          <button id="closeSheetModalBtn" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="modalDotsContainer" class="grid grid-cols-6 gap-2 overflow-y-auto custom-scrollbar p-2 my-3 max-h-72">
+          <!-- 动态渲染题卡 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部黑条 -->
+    <div class="w-28 h-1 bg-slate-300 rounded-full mx-auto my-2 shrink-0"></div>
+  </main>
+
+  <!-- 轻提示 Toast 弹窗 -->
+  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-full shadow-2xl transition-opacity duration-200 z-50 flex items-center space-x-2 opacity-0 pointer-events-none">
+    <i class="fa-solid fa-circle-info text-blue-400"></i>
+    <span id="toastMsg">成功识别 179 题！请点击下方绿色按钮下载代码</span>
+  </div>
+
+  <script>
+    /**
+     * ============================================================
+     * 全局静态固化题库变量
+     * 点击【下载永久内置题库的 index.html】时，此变量会被替换为真实的 179 题 JSON 数据
+     * ============================================================
+     */
+    let HARDCODED_BANK = [
+  {
+    "id": 1,
+    "type": "single",
+    "question": "药师协助患者支付指引时，以下哪种行为是合规的？",
+    "options": [
+      {
+        "key": "A",
+        "text": "承诺理赔结果"
+      },
+      {
+        "key": "B",
+        "text": "替患者填写全部申请材料"
+      },
+      {
+        "key": "C",
+        "text": "仅提供流程咨询和文件准备支持"
+      },
+      {
+        "key": "D",
+        "text": "解读保险条款的模糊内容"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 2,
+    "type": "single",
+    "question": "DTP药店转发罗氏相关内容给公众时，错误的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "注明转载来源"
+      },
+      {
+        "key": "B",
+        "text": "强制要求药店公众号转发"
+      },
+      {
+        "key": "C",
+        "text": "避免宣传处方药"
+      },
+      {
+        "key": "D",
+        "text": "仅转发官方新闻"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 3,
+    "type": "single",
+    "question": "眼科工具中1L患者如何在档案及随访表中体现",
+    "options": [
+      {
+        "key": "A",
+        "text": "2025年以前的治疗药物选择“无”"
+      },
+      {
+        "key": "B",
+        "text": "2025年以前的治疗药物选择“法瑞昔单抗（罗氏）”"
+      },
+      {
+        "key": "C",
+        "text": "2025年以前的治疗药物选择“其他”"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 4,
+    "type": "single",
+    "question": "2025年新业极眼科目标DOT是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "≥3周期"
+      },
+      {
+        "key": "B",
+        "text": "≥4周期"
+      },
+      {
+        "key": "C",
+        "text": "≥5周期"
+      },
+      {
+        "key": "D",
+        "text": "≥6周期"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 5,
+    "type": "single",
+    "question": "罗视佳基本医保第一年可以报销几针（单眼）？",
+    "options": [
+      {
+        "key": "A",
+        "text": "4"
+      },
+      {
+        "key": "B",
+        "text": "5"
+      },
+      {
+        "key": "C",
+        "text": "6"
+      },
+      {
+        "key": "D",
+        "text": "7"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 6,
+    "type": "single",
+    "question": "眼底病患者30%的患者中断治疗多长时间出现永久性实力损伤？",
+    "options": [
+      {
+        "key": "A",
+        "text": "半年"
+      },
+      {
+        "key": "B",
+        "text": "1年"
+      },
+      {
+        "key": "C",
+        "text": "2年"
+      },
+      {
+        "key": "D",
+        "text": "3年"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 7,
+    "type": "single",
+    "question": "关于萨特利珠单给药剂量说法正确的是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "本品的推荐负荷剂量为在第 0、 1和 3周进行前三次皮下注射给药，每次 120 mg，之后每4周给予一剂 120 mg 维持剂量。"
+      },
+      {
+        "key": "B",
+        "text": "本品的推荐负荷剂量为在第 0、 2 和 4 周进行前三次皮下注射给药，每次 140 mg，之后每1周给予一剂 140 mg 维持剂量。"
+      },
+      {
+        "key": "C",
+        "text": "本品的推荐负荷剂量为在第 0、 2 和 4 周进行前三次皮下注射给药，每次 120 mg，之后每4周给予一剂 120 mg 维持剂量。"
+      },
+      {
+        "key": "D",
+        "text": "本品的推荐负荷剂量为在第 0、 2 和 3 周进行前三次皮下注射给药，每次 140 mg，之后每1周给予一剂 140 mg 维持剂量。"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 8,
+    "type": "single",
+    "question": "HER2患者双靶治疗的目标DOT周期是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "8"
+      },
+      {
+        "key": "B",
+        "text": "14"
+      },
+      {
+        "key": "C",
+        "text": "18"
+      },
+      {
+        "key": "D",
+        "text": "21"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 9,
+    "type": "single",
+    "question": "在HER2阳性早期乳腺癌患者中进行的III期APHINITY研究中，结束了为期一年的曲帕双靶和化疗作为术后辅助治疗患者10年生存率是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.898"
+      },
+      {
+        "key": "B",
+        "text": "0.906"
+      },
+      {
+        "key": "C",
+        "text": "0.916"
+      },
+      {
+        "key": "D",
+        "text": "0.919"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 10,
+    "type": "single",
+    "question": "伊那利塞（伊赫莱）正常剂量服用一盒可以服用多少天？",
+    "options": [
+      {
+        "key": "A",
+        "text": "14"
+      },
+      {
+        "key": "B",
+        "text": "21"
+      },
+      {
+        "key": "C",
+        "text": "28"
+      },
+      {
+        "key": "D",
+        "text": "30"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 11,
+    "type": "single",
+    "question": "2025年优罗华的目标人群是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "1L"
+      },
+      {
+        "key": "B",
+        "text": "2L"
+      },
+      {
+        "key": "C",
+        "text": "3L及以上"
+      },
+      {
+        "key": "D",
+        "text": "以上全部都是"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 12,
+    "type": "single",
+    "question": "安圣莎早期患者标准疗程为？",
+    "options": [
+      {
+        "key": "A",
+        "text": "6个月"
+      },
+      {
+        "key": "B",
+        "text": "16个月"
+      },
+      {
+        "key": "C",
+        "text": "24个月"
+      },
+      {
+        "key": "D",
+        "text": "48个月"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 13,
+    "type": "single",
+    "question": "安圣莎晚期治疗亚洲患者疗效中位PFS时间多长",
+    "options": [
+      {
+        "key": "A",
+        "text": "41.6个月"
+      },
+      {
+        "key": "B",
+        "text": "41.7个月"
+      },
+      {
+        "key": "C",
+        "text": "42.6个月"
+      },
+      {
+        "key": "D",
+        "text": "42.7个月"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 14,
+    "type": "single",
+    "question": "安圣莎晚期III期临床研究显示7年OS率达到多少？脑转移患者中位OS达多少个月？",
+    "options": [
+      {
+        "key": "A",
+        "text": "56%，71.8个月"
+      },
+      {
+        "key": "B",
+        "text": "56%，72.8个月"
+      },
+      {
+        "key": "C",
+        "text": "55%，72.8个月"
+      },
+      {
+        "key": "D",
+        "text": "55%，71.8个月"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 15,
+    "type": "single",
+    "question": "每月20号在各个TA的数据工具中导出月报分析报告的键盘按键是?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Ctrl+shift+S"
+      },
+      {
+        "key": "B",
+        "text": "Shift+enter+P"
+      },
+      {
+        "key": "C",
+        "text": "Ctrl+shift+P"
+      },
+      {
+        "key": "D",
+        "text": "Ctrl+enter+S"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 16,
+    "type": "single",
+    "question": "某患者于2025.5.20购买了3盒优罗华，药师在数据工具中登记为了2盒，6月10日药师发现错误后正确的修正操作是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "在购药登记中登记一笔2025.6.10购买数量为1盒的记录"
+      },
+      {
+        "key": "B",
+        "text": "在购药登记中登记一笔2025.5.20，购买数量为-2盒的记录；再登记一笔2025.5.20，购买数量为3盒的记录"
+      },
+      {
+        "key": "C",
+        "text": "在购药登记中登记一笔2025.5.20购买数量为1盒的记录"
+      },
+      {
+        "key": "D",
+        "text": "手动调整累计购药数量"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 17,
+    "type": "single",
+    "question": "BC案例：当期新增的赫双妥清泉人数如何计算",
+    "options": [
+      {
+        "key": "A",
+        "text": "直接引用本期累计前置服务后双靶皮下获益人数"
+      },
+      {
+        "key": "B",
+        "text": "本期累计前置服务后双靶皮下获益人数-上期累计前置服务后双靶皮下获益人数"
+      },
+      {
+        "key": "C",
+        "text": "直接引用本期累计建档人数-赫双妥"
+      },
+      {
+        "key": "D",
+        "text": "本期累计建档人数-赫双妥-上期累计建档人数-赫双妥"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 18,
+    "type": "single",
+    "question": "LC案例：药店6月一共有10名活跃晚肺患者，其中7月有8人购药，1人转渠道，1人联系不上，药店的7月的复购率是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.8"
+      },
+      {
+        "key": "B",
+        "text": "0.9"
+      },
+      {
+        "key": "C",
+        "text": "0.75"
+      },
+      {
+        "key": "D",
+        "text": "0.85"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 19,
+    "type": "single",
+    "question": "LC案例：药店6月一共有10名累计建档的早肺患者，其中活跃人数为6人，其中2人转渠道脱组，其中25年2人脱落，药店的YTD6月的总脱落率是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.2"
+      },
+      {
+        "key": "B",
+        "text": "0.33"
+      },
+      {
+        "key": "C",
+        "text": "0.4"
+      },
+      {
+        "key": "D",
+        "text": "0.67"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 20,
+    "type": "single",
+    "question": "在政策趋势与落实整体战略的双轮驱动下，MCE部门的新定位是罗氏内部部门以及外部渠道合作伙伴的（）",
+    "options": [
+      {
+        "key": "A",
+        "text": "联接者"
+      },
+      {
+        "key": "B",
+        "text": "催化剂"
+      },
+      {
+        "key": "C",
+        "text": "助推器"
+      },
+      {
+        "key": "D",
+        "text": "整合者"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 21,
+    "type": "single",
+    "question": "MCE团队自我修炼的关键不包括？​",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 看清政策形势"
+      },
+      {
+        "key": "B",
+        "text": "B. 主动进取"
+      },
+      {
+        "key": "C",
+        "text": "C. 承担战略性\"小亏\""
+      },
+      {
+        "key": "D",
+        "text": "D. 专注传统商务返点谈判"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 22,
+    "type": "single",
+    "question": "以下不需要做述职报告的场景是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "试用期考核"
+      },
+      {
+        "key": "B",
+        "text": "第一个三年合同到期"
+      },
+      {
+        "key": "C",
+        "text": "第二个三年合同到期"
+      },
+      {
+        "key": "D",
+        "text": "转岗后"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 23,
+    "type": "single",
+    "question": "绩效考核的要素不包含下列哪一项？",
+    "options": [
+      {
+        "key": "A",
+        "text": "做了什么"
+      },
+      {
+        "key": "B",
+        "text": "怎么做到的"
+      },
+      {
+        "key": "C",
+        "text": "影响力"
+      },
+      {
+        "key": "D",
+        "text": "全勤率"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 24,
+    "type": "single",
+    "question": "2030年中国肿瘤患者五年生存率目标值是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 43.7%"
+      },
+      {
+        "key": "B",
+        "text": "B. 46.6%"
+      },
+      {
+        "key": "C",
+        "text": "C. 50.0%"
+      },
+      {
+        "key": "D",
+        "text": "D. 55.2%"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 25,
+    "type": "single",
+    "question": "以下哪一项不属于患者需求多元化的表现？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 心理、营养等非治疗服务"
+      },
+      {
+        "key": "B",
+        "text": "B. 医保覆盖范围扩大至治疗期前后的筛查/康复管理等"
+      },
+      {
+        "key": "C",
+        "text": "C. 降低医生薪酬水平"
+      },
+      {
+        "key": "D",
+        "text": "D. 数智化信息平权"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 26,
+    "type": "single",
+    "question": "哪一项属于中国医疗资源的结构性矛盾突出表现？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 医生总数不足"
+      },
+      {
+        "key": "B",
+        "text": "B. 三级医院床位利用率91% vs 一级医院54%"
+      },
+      {
+        "key": "C",
+        "text": "C. 医保覆盖过广"
+      },
+      {
+        "key": "D",
+        "text": "D. 药品价格过高"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 27,
+    "type": "single",
+    "question": "价值医疗的核心定义是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 降低医疗成本"
+      },
+      {
+        "key": "B",
+        "text": "B. 在单位医疗成本投入下，最大化提升患者的健康结果"
+      },
+      {
+        "key": "C",
+        "text": "C. 提高医疗服务价格"
+      },
+      {
+        "key": "D",
+        "text": "D. 扩大医保覆盖范围"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 28,
+    "type": "single",
+    "question": "近年来，中国对于抗肿瘤创新药的审批出现了哪种趋势？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 审批时间与美国相比显著延长"
+      },
+      {
+        "key": "B",
+        "text": "B. 审批时间与美国相比显著缩短"
+      },
+      {
+        "key": "C",
+        "text": "C. 审批时间与美国相比没有变化"
+      },
+      {
+        "key": "D",
+        "text": "D. 只批准本土药企的创新药"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 29,
+    "type": "single",
+    "question": "分级诊疗中“数智化赋能”的关键作用是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 减少医生数量"
+      },
+      {
+        "key": "B",
+        "text": "B. 实现患者流转不流失"
+      },
+      {
+        "key": "C",
+        "text": "C. 取消医保支付"
+      },
+      {
+        "key": "D",
+        "text": "D. 提高药品价格"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 30,
+    "type": "single",
+    "question": "科研赋能中“小罗智多星”的核心功能是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 商保直付"
+      },
+      {
+        "key": "B",
+        "text": "B. AI科研全流程支持智搜/智读/智答/智写"
+      },
+      {
+        "key": "C",
+        "text": "C. 电子处方流转"
+      },
+      {
+        "key": "D",
+        "text": "D. DRG病组测算"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 31,
+    "type": "single",
+    "question": "“科研让Money变Paper，成果转化让Paper变Money”强调的核心是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 降低科研成本"
+      },
+      {
+        "key": "B",
+        "text": "B. 打通科研与成果转化闭环"
+      },
+      {
+        "key": "C",
+        "text": "C. 增加论文发表数量"
+      },
+      {
+        "key": "D",
+        "text": "D. 减少临床试验时间"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 32,
+    "type": "single",
+    "question": "社商/商保发展中，“直联直付”主要解决什么问题？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 降低保费价格"
+      },
+      {
+        "key": "B",
+        "text": "B. 将商保资金转化为直接医疗支出"
+      },
+      {
+        "key": "C",
+        "text": "C. 扩大医保目录"
+      },
+      {
+        "key": "D",
+        "text": "D. 减少医院床位"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 33,
+    "type": "single",
+    "question": "\"懂业务\"的本质是指理解什么？​​",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 各TA产品知识和策略"
+      },
+      {
+        "key": "B",
+        "text": "B. 商业公司合作流程"
+      },
+      {
+        "key": "C",
+        "text": "C. 业务增长的关键驱动因素和阻碍因素"
+      },
+      {
+        "key": "D",
+        "text": "D. 三医政策"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 34,
+    "type": "single",
+    "question": "肿瘤药与普药的核心差异在于？​​（单选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 价格和用药周期"
+      },
+      {
+        "key": "B",
+        "text": "B. 肿瘤药具有连续适应症。肿瘤药首个适应症贡献生命周期销量的20%-30%，后续的适应症决定销量规模。"
+      },
+      {
+        "key": "C",
+        "text": "C. 医生处方习惯不同"
+      },
+      {
+        "key": "D",
+        "text": "D. 医保政策不同"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 35,
+    "type": "single",
+    "question": "以下关于赫双妥的优势，说法错误的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "全球首个复方抗体皮下制剂"
+      },
+      {
+        "key": "B",
+        "text": "皮下给药，操作便捷，仅需5-8分钟"
+      },
+      {
+        "key": "C",
+        "text": "在儿童和青少年（<18 岁）中的安全性和疗效确切"
+      },
+      {
+        "key": "D",
+        "text": "固定剂量，不受体重变化影响"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 36,
+    "type": "single",
+    "question": "帕妥珠曲妥珠单抗注射液（皮下注射）的适应症是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "HR+晚期乳腺癌"
+      },
+      {
+        "key": "B",
+        "text": "HER2 阳性的早期或转移性乳腺癌"
+      },
+      {
+        "key": "C",
+        "text": "三阴性乳腺癌"
+      },
+      {
+        "key": "D",
+        "text": "以上都是"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 37,
+    "type": "single",
+    "question": "赫双妥双靶，辅助治疗10年生存数据OS为？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.832"
+      },
+      {
+        "key": "B",
+        "text": "0.916"
+      },
+      {
+        "key": "C",
+        "text": "0.956"
+      },
+      {
+        "key": "D",
+        "text": "0.857"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 38,
+    "type": "single",
+    "question": "赫双妥标准治疗方案的次数是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "负荷剂量2次，维持剂量16次"
+      },
+      {
+        "key": "B",
+        "text": "负荷剂量3次，维持剂量15次"
+      },
+      {
+        "key": "C",
+        "text": "负荷剂量1次，维持剂量17次"
+      },
+      {
+        "key": "D",
+        "text": "负荷剂量4次，维持剂量14次"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 39,
+    "type": "single",
+    "question": "相比单通路药物，罗视佳新增了哪条作用通路？",
+    "options": [
+      {
+        "key": "A",
+        "text": "抗VEGF通路"
+      },
+      {
+        "key": "B",
+        "text": "抗Ang-2通路"
+      },
+      {
+        "key": "C",
+        "text": "VEGF通路"
+      },
+      {
+        "key": "D",
+        "text": "Ang-2通路"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 40,
+    "type": "single",
+    "question": "全球三期研究表明，双通路法瑞西单抗治疗后，有多少比例患者达到4个月及以上间隔？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.6"
+      },
+      {
+        "key": "B",
+        "text": "0.7"
+      },
+      {
+        "key": "C",
+        "text": "0.8"
+      },
+      {
+        "key": "D",
+        "text": "0.9"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 41,
+    "type": "single",
+    "question": "法瑞西单抗Slogan的后半句，追求“临床治愈”新净界指的是哪种报告的影像恢复正常？",
+    "options": [
+      {
+        "key": "A",
+        "text": "OCT"
+      },
+      {
+        "key": "B",
+        "text": "FFA"
+      },
+      {
+        "key": "C",
+        "text": "OCTA"
+      },
+      {
+        "key": "D",
+        "text": "眼底照相"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 42,
+    "type": "single",
+    "question": "伊赫莱®的3级以上高血糖发生率约为？",
+    "options": [
+      {
+        "key": "A",
+        "text": "0.01"
+      },
+      {
+        "key": "B",
+        "text": "0.056"
+      },
+      {
+        "key": "C",
+        "text": "0.15"
+      },
+      {
+        "key": "D",
+        "text": "0.37"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 43,
+    "type": "single",
+    "question": "伊赫莱®的参照药建议是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "哌柏西利"
+      },
+      {
+        "key": "B",
+        "text": "阿培利司"
+      },
+      {
+        "key": "C",
+        "text": "卡匹色替"
+      },
+      {
+        "key": "D",
+        "text": "空白参照"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 44,
+    "type": "single",
+    "question": "下面关于伊赫莱®安全性的说法正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "安全性可管可控，不良事件多为轻中度（1-2级）"
+      },
+      {
+        "key": "B",
+        "text": "安全性可管可控，不良时间多为轻中度（1-3级）"
+      },
+      {
+        "key": "C",
+        "text": "整体安全性有一定风险，不良时间多为中度（2-4级）"
+      },
+      {
+        "key": "D",
+        "text": "整体安全性有一定风险，不良时间多为中度（3-4级）"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 45,
+    "type": "single",
+    "question": "PIK3CA检测纳入国家考核的指标是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "肿瘤靶向用药检测率"
+      },
+      {
+        "key": "B",
+        "text": "首次靶向治疗前分子病理检测率"
+      },
+      {
+        "key": "C",
+        "text": "基因突变筛查率"
+      },
+      {
+        "key": "D",
+        "text": "病理检测覆盖率"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 46,
+    "type": "single",
+    "question": "伊赫莱®的差异化定位是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "最便宜的PI3K抑制剂"
+      },
+      {
+        "key": "B",
+        "text": "唯一血液肿瘤PI3K抑制剂"
+      },
+      {
+        "key": "C",
+        "text": "首个PI3Kα抑制剂+降解剂"
+      },
+      {
+        "key": "D",
+        "text": "唯一口服mTOR抑制剂"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 47,
+    "type": "single",
+    "question": "特泊替尼的适应症是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "EGFR突变NSCLC"
+      },
+      {
+        "key": "B",
+        "text": "ALK阳性NSCLC"
+      },
+      {
+        "key": "C",
+        "text": "ROS1重排NSCLC"
+      },
+      {
+        "key": "D",
+        "text": "​​MET外显子14跳跃突变的局部晚期或转移性NSCLC​​"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 48,
+    "type": "single",
+    "question": "《2024CSCO非小细胞肺癌指南》对特泊替尼的推荐等级是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "​​Ⅰ级推荐"
+      },
+      {
+        "key": "B",
+        "text": "Ⅱ级推荐"
+      },
+      {
+        "key": "C",
+        "text": "Ⅲ级推荐"
+      },
+      {
+        "key": "D",
+        "text": "未推荐"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 49,
+    "type": "single",
+    "question": "特泊替尼（Tepotinib)一线治疗亚裔患者的mPFS 和 mOS是多少？",
+    "options": [
+      {
+        "key": "A",
+        "text": "mPFS 17.5m\nmOS 30.3m"
+      },
+      {
+        "key": "B",
+        "text": "mPFS 16.5m\nmOS 32.7m"
+      },
+      {
+        "key": "C",
+        "text": "mPFS 15.9m\nmOS 29.7m"
+      },
+      {
+        "key": "D",
+        "text": "mPFS 14.2m\nmOS 22.6m"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 50,
+    "type": "single",
+    "question": "DLBCL一线治疗的目标是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "疾病缓解"
+      },
+      {
+        "key": "B",
+        "text": "延迟复发"
+      },
+      {
+        "key": "C",
+        "text": "完全缓解"
+      },
+      {
+        "key": "D",
+        "text": "最佳支持治疗"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 51,
+    "type": "single",
+    "question": "高罗华是具有独特（ ）结构的双特异性抗体？",
+    "options": [
+      {
+        "key": "A",
+        "text": "2：1"
+      },
+      {
+        "key": "B",
+        "text": "1：1"
+      },
+      {
+        "key": "C",
+        "text": "1：2"
+      },
+      {
+        "key": "D",
+        "text": "2：2"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 52,
+    "type": "single",
+    "question": "高罗华的治疗周期是多少个cycle？",
+    "options": [
+      {
+        "key": "A",
+        "text": "6"
+      },
+      {
+        "key": "B",
+        "text": "8"
+      },
+      {
+        "key": "C",
+        "text": "12"
+      },
+      {
+        "key": "D",
+        "text": "16"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 53,
+    "type": "single",
+    "question": "高罗华联合GemOx实现（ ）OS获益，中位OS超2年",
+    "options": [
+      {
+        "key": "A",
+        "text": "单倍"
+      },
+      {
+        "key": "B",
+        "text": "双倍"
+      },
+      {
+        "key": "C",
+        "text": "三倍"
+      },
+      {
+        "key": "D",
+        "text": "四倍"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 54,
+    "type": "single",
+    "question": "目前国内医保目录内是否有TCE疗法可用？",
+    "options": [
+      {
+        "key": "A",
+        "text": "无"
+      },
+      {
+        "key": "B",
+        "text": "有"
+      }
+    ],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 55,
+    "type": "single",
+    "question": "玛巴洛沙韦属于以下哪类抗病毒药物？",
+    "options": [
+      {
+        "key": "A",
+        "text": "金刚烷胺类"
+      },
+      {
+        "key": "B",
+        "text": "RNA聚合酶抑制剂"
+      },
+      {
+        "key": "C",
+        "text": "神经氨酸酶抑制剂"
+      },
+      {
+        "key": "D",
+        "text": "DNA多聚酶抑制剂"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 56,
+    "type": "single",
+    "question": "流感病毒RNA聚合酶抑制剂的作用机制？",
+    "options": [
+      {
+        "key": "A",
+        "text": "抑制早期病毒与宿主细胞的识别与融合过程，阻止病毒进入细胞"
+      },
+      {
+        "key": "B",
+        "text": "阻断流感病毒表面的基质离子通道蛋白2 ，阻止病毒RNA迁移入细胞核"
+      },
+      {
+        "key": "C",
+        "text": "通过抑制流感病毒核糖核蛋白的PA，PB1和PB2亚基，抑制病毒mRNA的合成"
+      },
+      {
+        "key": "D",
+        "text": "诱导NP的聚集，拮抗NP的入核及核内的聚集，阻断宿主细胞核转录、复制，抑制流感病毒增殖复制"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 57,
+    "type": "single",
+    "question": "玛巴洛沙韦是在病毒复制的哪个阶段起作用？",
+    "options": [
+      {
+        "key": "A",
+        "text": "粘附"
+      },
+      {
+        "key": "B",
+        "text": "膜融合"
+      },
+      {
+        "key": "C",
+        "text": "病毒RNA复制"
+      },
+      {
+        "key": "D",
+        "text": "出芽"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 58,
+    "type": "single",
+    "question": "一般科研项目结题验收的关键产出物是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "经费使用明细"
+      },
+      {
+        "key": "B",
+        "text": "患者随访记录"
+      },
+      {
+        "key": "C",
+        "text": "结题报告与成果证明"
+      },
+      {
+        "key": "D",
+        "text": "伦理审批文件"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 59,
+    "type": "single",
+    "question": "医院科研经费管理中，\"配套经费\"通常指？",
+    "options": [
+      {
+        "key": "A",
+        "text": "企业捐赠资金"
+      },
+      {
+        "key": "B",
+        "text": "医院自筹匹配资金"
+      },
+      {
+        "key": "C",
+        "text": "政府专项补贴"
+      },
+      {
+        "key": "D",
+        "text": "患者支付费用"
+      }
+    ],
+    "answer": "B",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 60,
+    "type": "single",
+    "question": "医院科研项目的核心审批机构是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "医务科"
+      },
+      {
+        "key": "B",
+        "text": "药事委员会"
+      },
+      {
+        "key": "C",
+        "text": "伦理委员会"
+      },
+      {
+        "key": "D",
+        "text": "院办"
+      }
+    ],
+    "answer": "C",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 61,
+    "type": "single",
+    "question": "真实世界研究（RWS）与传统RCT的核心区别在于（ ）？",
+    "options": [
+      {
+        "key": "A",
+        "text": "研究周期长短"
+      },
+      {
+        "key": "B",
+        "text": "统计分析方法"
+      },
+      {
+        "key": "C",
+        "text": "伦理审批层级"
+      },
+      {
+        "key": "D",
+        "text": "数据来源的干预性控制"
+      }
+    ],
+    "answer": "D",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 62,
+    "type": "multiple",
+    "question": "利司扑兰需要用哪种液体进行配制",
+    "options": [
+      {
+        "key": "A",
+        "text": "纯化水"
+      },
+      {
+        "key": "B",
+        "text": "生理盐水"
+      },
+      {
+        "key": "C",
+        "text": "纯净水"
+      },
+      {
+        "key": "D",
+        "text": "注射用水"
+      }
+    ],
+    "answer": "AD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 63,
+    "type": "multiple",
+    "question": "关于利司扑兰的使用，正确的是",
+    "options": [
+      {
+        "key": "A",
+        "text": "如果患者收到的利司扑兰为粉末状，应立即在家配制后再使用"
+      },
+      {
+        "key": "B",
+        "text": "不可以将利司扑兰口服溶液混入食物中服用"
+      },
+      {
+        "key": "C",
+        "text": "如果抽取口服溶液时发现口服喂药器中有大气泡，则应立即丢弃并重新抽取"
+      },
+      {
+        "key": "D",
+        "text": "在给予处方剂量的利司扑兰后，应立即饮用水，确保服下所有剂量"
+      }
+    ],
+    "answer": "BD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 64,
+    "type": "multiple",
+    "question": "肺癌靶向药常见不良反应有？",
+    "options": [
+      {
+        "key": "A",
+        "text": "胃肠道反应"
+      },
+      {
+        "key": "B",
+        "text": "皮疹"
+      },
+      {
+        "key": "C",
+        "text": "水肿"
+      },
+      {
+        "key": "D",
+        "text": "肌肉酸痛"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 65,
+    "type": "multiple",
+    "question": "院内患者服务的药师（拓院内药师），下列哪些行为不合适",
+    "options": [
+      {
+        "key": "A",
+        "text": "传递或暗示院内患者服务是罗氏主导的合作行为，暗示自己是“罗氏推荐药师”"
+      },
+      {
+        "key": "B",
+        "text": "患者知情同意后协助患者在药店建档和随访管理"
+      },
+      {
+        "key": "C",
+        "text": "向患者提供诊疗方案建议"
+      },
+      {
+        "key": "D",
+        "text": "药师职责范围由医院与药店共同协商后确定"
+      }
+    ],
+    "answer": "AC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 66,
+    "type": "multiple",
+    "question": "在与药店开展项目时，应遵顼以下哪些原则",
+    "options": [
+      {
+        "key": "A",
+        "text": "未经内部跨部门评估审批，不得指示、要求或与药师协同开展任何涉及HCP、政府官员、患者、学协会基金会、媒体等第三方的合作项目"
+      },
+      {
+        "key": "B",
+        "text": "不得不合规地参与或介入第三方项目的执行（PAP/PBP/CHI/GSD等）"
+      },
+      {
+        "key": "C",
+        "text": "不得将PAP/PBP项目介绍为药价折扣项目以诱导患者购药"
+      },
+      {
+        "key": "D",
+        "text": "药店数据分享内容仅限于统计类数据，不得涉及患者个人信息或统方信息。"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 67,
+    "type": "multiple",
+    "question": "罗氏内部在进行数据分享时，哪些是不合规操作？",
+    "options": [
+      {
+        "key": "A",
+        "text": "包含患者姓名缩写"
+      },
+      {
+        "key": "B",
+        "text": "分享内容标注“内部保密资料，仅供内部XX会议/场合使用，严禁转发和外传”水印"
+      },
+      {
+        "key": "C",
+        "text": "未经许可转发给外部合作伙伴"
+      },
+      {
+        "key": "D",
+        "text": "分享统方信息以提升效率"
+      }
+    ],
+    "answer": "ACD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 68,
+    "type": "multiple",
+    "question": "2025年罗视佳患者首次到店购药的关键动作有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "医保支付指引，建立信任"
+      },
+      {
+        "key": "B",
+        "text": "眼底致盲不可逆，明确危害引起重视"
+      },
+      {
+        "key": "C",
+        "text": "标准复诊一张卡指引，明确长期治疗观念"
+      },
+      {
+        "key": "D",
+        "text": "术后回访，提醒术后注意事项，预约下次回访"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 69,
+    "type": "multiple",
+    "question": "2025年眼底病患者C2到C4的关键动作有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "术前一周回访，提醒复诊"
+      },
+      {
+        "key": "B",
+        "text": "重点关注C2/C3超30天未回流"
+      },
+      {
+        "key": "C",
+        "text": "术后电话回访，提醒术后注意事项，预约下次回访"
+      },
+      {
+        "key": "D",
+        "text": "按需协助报告解读，建立正确的治疗预期，减少自主原因的不规范"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 70,
+    "type": "multiple",
+    "question": "罗视佳的适应症是什么",
+    "options": [
+      {
+        "key": "A",
+        "text": "糖尿病性黄斑水肿（DME"
+      },
+      {
+        "key": "B",
+        "text": "新生血管性（湿性）年龄相关性黄斑变性（nAMD"
+      },
+      {
+        "key": "C",
+        "text": "继发于视网膜分支静脉阻塞（\nBRVO ）的黄斑水肿"
+      },
+      {
+        "key": "D",
+        "text": "视网膜脱落"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 71,
+    "type": "multiple",
+    "question": "使用萨特利珠单抗进行注射给药时，应_______：",
+    "options": [
+      {
+        "key": "A",
+        "text": "不得由患者自行皮下注射给药"
+      },
+      {
+        "key": "B",
+        "text": "在HCP的指导下由患者自行皮下注射给药"
+      },
+      {
+        "key": "C",
+        "text": "即使经过适当的皮下注射技术培训，也不得由患者自行给药"
+      },
+      {
+        "key": "D",
+        "text": "经过适当的皮下注射技术培训后，如果HCP认为合适，患者可自行注射或由患者的看护人进行注射给药"
+      }
+    ],
+    "answer": "BD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 72,
+    "type": "multiple",
+    "question": "赫双妥今年新业极的服务目标有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "赫双妥总服务人数"
+      },
+      {
+        "key": "B",
+        "text": "赫双妥清泉人数"
+      },
+      {
+        "key": "C",
+        "text": "赫双妥脱落率≤10%（年化，不含正常治疗周期结束和转渠道)"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 73,
+    "type": "multiple",
+    "question": "伊赫莱6月新业极的服务要求是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "应管尽管-DTP药店伊赫莱患者有一个管一个"
+      },
+      {
+        "key": "B",
+        "text": "一本手册-每个患者发放患者手册"
+      },
+      {
+        "key": "C",
+        "text": "首月每周两次血糖监测随访"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 74,
+    "type": "multiple",
+    "question": "赫双妥在哪些适应症可以报销？",
+    "options": [
+      {
+        "key": "A",
+        "text": "早期乳腺癌（EBC）本品与化疗联合\n用于 HER2 阳性、局部晚期、炎性或早期乳腺癌患者（直径>2 cm 或淋巴结阳性）的新辅助治疗"
+      },
+      {
+        "key": "B",
+        "text": "早期乳腺癌（EBC）本品与化疗联合 用于具有高复发风险 HER2 阳性早期乳腺癌患者的辅助治疗"
+      },
+      {
+        "key": "C",
+        "text": "转移性乳腺癌（MBC）：\n本品和多西他赛联合，适用于 HER2 阳性、转移性或不可切除的局部复\n发性乳腺癌患者。患者既往未接受过针对转移性乳腺癌的抗 HER2 治疗\n或者化疗。"
+      },
+      {
+        "key": "D",
+        "text": "转移性乳腺癌（MBC）：\n本品和多西他赛联合，适用于 HER2 阳性、转移性或不可切除的局部复\n发性乳腺癌患者。患者既往接受过针对转移性乳腺癌的抗 HER2 治疗\n或者化疗。"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 75,
+    "type": "multiple",
+    "question": "伊那利塞（伊赫莱）最常见的不良反应有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "高血糖"
+      },
+      {
+        "key": "B",
+        "text": "口腔黏膜炎"
+      },
+      {
+        "key": "C",
+        "text": "腹泻"
+      },
+      {
+        "key": "D",
+        "text": "皮疹"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 76,
+    "type": "multiple",
+    "question": "伊那利塞（伊赫莱）血糖管理需要注意的事项有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "在启动伊那利塞治疗后，应根据产品说明书或患者手册中的时间表进行空腹血糖监测或自我监测"
+      },
+      {
+        "key": "B",
+        "text": "伊赫莱相关高血糖主要发生于用药早期。INAVO120研究中至首次发生高血糖事件的中位时间为7天"
+      },
+      {
+        "key": "C",
+        "text": "伊赫莱相关高血糖可预测，易识别，可管理，且停药后完全可逆。"
+      },
+      {
+        "key": "D",
+        "text": "伊赫莱相关高血糖可通过剂量调整和药物管理得到有效改善。二甲双胍是最适合的用于治疗PI3K通路相关高血糖的降糖药物。"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 77,
+    "type": "multiple",
+    "question": "血液领域为什么需要通过结对子加强与临床的合作？",
+    "options": [
+      {
+        "key": "A",
+        "text": "血液疾病领域疾病复杂，仅依靠DTP药师管理不能解决患者管理问题"
+      },
+      {
+        "key": "B",
+        "text": "DLBCL疾病治疗方案主要依靠临床制定，患者自主决定的因素相对疾病领域较低"
+      },
+      {
+        "key": "C",
+        "text": "药师通过结对子成为临床医生和患者管理的桥梁，促使患者问题及时回归临床"
+      },
+      {
+        "key": "D",
+        "text": "结对子不需要定期开展医生和药师的互动"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 78,
+    "type": "multiple",
+    "question": "2025血液结对子鼓励哪几种模式？",
+    "options": [
+      {
+        "key": "A",
+        "text": "单家医院院内院外协同"
+      },
+      {
+        "key": "B",
+        "text": "病理科到血液科的多科室协同管理"
+      },
+      {
+        "key": "C",
+        "text": "互联网医院+全病程管理平台"
+      },
+      {
+        "key": "D",
+        "text": "分级诊疗的多医院协同管理"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 79,
+    "type": "multiple",
+    "question": "我国DLBCL患者在诊疗和管理过程中面临的核心痛点包括哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "误诊率高，确诊周期长"
+      },
+      {
+        "key": "B",
+        "text": "复发风险高，心理负担重"
+      },
+      {
+        "key": "C",
+        "text": "老年患者多，合并症复杂，治疗依从性差"
+      },
+      {
+        "key": "D",
+        "text": "经济支付压力大，远超灾难性家庭支出标准"
+      }
+    ],
+    "answer": "ABCDE",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 80,
+    "type": "multiple",
+    "question": "DLBCL老年患者（65岁以上）占比超半数，他们面临哪些多重负担，亟需连续性服务破解？",
+    "options": [
+      {
+        "key": "A",
+        "text": "合并症多，影响治疗选择和结果"
+      },
+      {
+        "key": "B",
+        "text": "5年生存率更低"
+      },
+      {
+        "key": "C",
+        "text": "对治疗耐受性差"
+      },
+      {
+        "key": "D",
+        "text": "治疗周期长，心理负担重"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 81,
+    "type": "multiple",
+    "question": "优罗华治疗进展的患者，是否还需要持续随访",
+    "options": [
+      {
+        "key": "A",
+        "text": "需要，持续跟进"
+      },
+      {
+        "key": "B",
+        "text": "需要，传递双抗治疗方案"
+      },
+      {
+        "key": "C",
+        "text": "没有必要持续跟进"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 82,
+    "type": "multiple",
+    "question": "优罗华治疗康复阶段的患者是否还需要持续随访",
+    "options": [
+      {
+        "key": "A",
+        "text": "需要，减少随访频率"
+      },
+      {
+        "key": "B",
+        "text": "需要，保持当前每月1次的随访频率"
+      },
+      {
+        "key": "C",
+        "text": "需要，跟进患者疾病进展，便于后续治疗方案迭代"
+      },
+      {
+        "key": "D",
+        "text": "没有必要持续跟进"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 83,
+    "type": "multiple",
+    "question": "安圣莎早肺今年新业极的核心服务目标有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "累计服务人数"
+      },
+      {
+        "key": "B",
+        "text": "规范治疗人数≥90%"
+      },
+      {
+        "key": "C",
+        "text": "全年脱落率（不含转渠道及24周期结束治疗）≤10%"
+      },
+      {
+        "key": "D",
+        "text": "DOT16人数"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 84,
+    "type": "multiple",
+    "question": "安圣莎晚肺今年新业极的核心服务目标有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "累计服务人数"
+      },
+      {
+        "key": "B",
+        "text": "规范治疗人数≥90%"
+      },
+      {
+        "key": "C",
+        "text": "全年脱落率（不含转渠道及24周期结束治疗）≤10%"
+      },
+      {
+        "key": "D",
+        "text": "DOT16人数"
+      }
+    ],
+    "answer": "AD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 85,
+    "type": "multiple",
+    "question": "对于DTP药房药师而言，使用安圣莎的ALK+肺癌患者在患者管理中的痛点有哪些？",
+    "options": [
+      {
+        "key": "A",
+        "text": "用药指导与依从性管理"
+      },
+      {
+        "key": "B",
+        "text": "不良反应监测与应对"
+      },
+      {
+        "key": "C",
+        "text": "支付与费用管理"
+      },
+      {
+        "key": "D",
+        "text": "长期随访与耐药预警"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 86,
+    "type": "multiple",
+    "question": "在以下安圣莎脱落原因中，哪些原因会被纳入脱落率计算范围？",
+    "options": [
+      {
+        "key": "A",
+        "text": "遵医嘱停止治疗/换方案而脱落"
+      },
+      {
+        "key": "B",
+        "text": "药物可及性不佳而脱落"
+      },
+      {
+        "key": "C",
+        "text": "连续84天联系不上"
+      },
+      {
+        "key": "D",
+        "text": "早肺24周期结束治疗而停止用药"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 87,
+    "type": "multiple",
+    "question": "安圣莎早期治疗目标是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "临床治愈"
+      },
+      {
+        "key": "B",
+        "text": "生存超过 5年且无复发迹象"
+      },
+      {
+        "key": "C",
+        "text": "DFS率达93.6%"
+      },
+      {
+        "key": "D",
+        "text": "术后不复发/没有死亡风险"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 88,
+    "type": "multiple",
+    "question": "每月超25号，如果区域数据有问题，具体的操作是",
+    "options": [
+      {
+        "key": "A",
+        "text": "可以随时调整"
+      },
+      {
+        "key": "B",
+        "text": "在27号中午12:00点反馈总部，过后数据总部概不接受"
+      },
+      {
+        "key": "C",
+        "text": "不可以调整"
+      },
+      {
+        "key": "D",
+        "text": "每月27号后的数据将被应用在月报、奖金和折扣"
+      }
+    ],
+    "answer": "BD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 89,
+    "type": "multiple",
+    "question": "眼科工具中，通过分析报告计算药店非转渠道患者的整体2周期留存率时需要用到的两个字段分别是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "45天前购买第1针的非转渠道患者"
+      },
+      {
+        "key": "B",
+        "text": "已购买第2针的非转渠道患者"
+      },
+      {
+        "key": "C",
+        "text": "90天前购买第1针的非转渠道患者"
+      },
+      {
+        "key": "D",
+        "text": "已购买第3针的人数"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 90,
+    "type": "multiple",
+    "question": "2025年人才OBP中包括哪三项？",
+    "options": [
+      {
+        "key": "A",
+        "text": "让高绩效成为习惯"
+      },
+      {
+        "key": "B",
+        "text": "人才培养提质增速"
+      },
+      {
+        "key": "C",
+        "text": "能力提升上对杠杆"
+      },
+      {
+        "key": "D",
+        "text": "绩效突破锚定高标"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 91,
+    "type": "multiple",
+    "question": "高绩效文化包括哪几项？",
+    "options": [
+      {
+        "key": "A",
+        "text": "求其上，志存高远"
+      },
+      {
+        "key": "B",
+        "text": "夺佳绩，时不我待"
+      },
+      {
+        "key": "C",
+        "text": "激人心，权责与共"
+      },
+      {
+        "key": "D",
+        "text": "固成果，精益求精"
+      }
+    ],
+    "answer": "ABCDE",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 92,
+    "type": "multiple",
+    "question": "肿瘤慢病化/共病化趋势的趋势包括？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 带瘤/无瘤生存时间延长"
+      },
+      {
+        "key": "B",
+        "text": "B. 急症及治疗期时间占比降低"
+      },
+      {
+        "key": "C",
+        "text": "C. 各类慢病的患病率随年龄增大显著上升"
+      },
+      {
+        "key": "D",
+        "text": "D. 预期寿命延长和人口老龄化使老年共病人群快速扩大"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 93,
+    "type": "multiple",
+    "question": "在2024年，医保准入展现价值导向的具体表现是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. I类新药成功率更高2024年74%"
+      },
+      {
+        "key": "B",
+        "text": "B. 外资药企成功率高于本土药企"
+      },
+      {
+        "key": "C",
+        "text": "C. 国谈成功药品中创新药占比逐年上升"
+      },
+      {
+        "key": "D",
+        "text": "D. 所有药品纳入成功率均等"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 94,
+    "type": "multiple",
+    "question": "分级诊疗的两大引擎是？多选",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 数智化赋能患者数据打通"
+      },
+      {
+        "key": "B",
+        "text": "B. 经济杠杆资源再分配"
+      },
+      {
+        "key": "C",
+        "text": "C. 减少三甲医院"
+      },
+      {
+        "key": "D",
+        "text": "D. 提高自费率"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 95,
+    "type": "multiple",
+    "question": "分级诊疗的“经济杠杆”具体表现为？多选",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 医疗硬件资源再分配"
+      },
+      {
+        "key": "B",
+        "text": "B. 医保/商保资源再分配"
+      },
+      {
+        "key": "C",
+        "text": "C. 医护劳动力资源再分配"
+      },
+      {
+        "key": "D",
+        "text": "D. 取消一级医院"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 96,
+    "type": "multiple",
+    "question": "“点线面体”增长杠杆中，“体”和“面”指什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 政策引导"
+      },
+      {
+        "key": "B",
+        "text": "B. 医院经营"
+      },
+      {
+        "key": "C",
+        "text": "C. 科室发展"
+      },
+      {
+        "key": "D",
+        "text": "D. 医生成长"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 97,
+    "type": "multiple",
+    "question": "为什么要多做“体面”的事",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 强杠杆效应，资源投入效率更高"
+      },
+      {
+        "key": "B",
+        "text": "B. 提升工作效率以及工作成果的持久性"
+      },
+      {
+        "key": "C",
+        "text": "C. 快速增加短期销量"
+      },
+      {
+        "key": "D",
+        "text": "D. 减少与医院沟通成本"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 98,
+    "type": "multiple",
+    "question": "CE-O四大战略方向包含？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 科研赋能"
+      },
+      {
+        "key": "B",
+        "text": "B. 创新支付"
+      },
+      {
+        "key": "C",
+        "text": "C. 同质化诊疗"
+      },
+      {
+        "key": "D",
+        "text": "D. 数智化赋能"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 99,
+    "type": "multiple",
+    "question": "研究型医院建设中，罗氏科研赋能的重点客户类型？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 院长"
+      },
+      {
+        "key": "B",
+        "text": "B. 临床医生"
+      },
+      {
+        "key": "C",
+        "text": "C. 医保局"
+      },
+      {
+        "key": "D",
+        "text": "D. 药学部"
+      }
+    ],
+    "answer": "ABD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 100,
+    "type": "multiple",
+    "question": "下列哪些属于科研赋能的工具/平台？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 小罗智多星"
+      },
+      {
+        "key": "B",
+        "text": "B. 知行研究院"
+      },
+      {
+        "key": "C",
+        "text": "C. 支付样板间"
+      },
+      {
+        "key": "D",
+        "text": "D. \"我要上清华\"孵化平台"
+      }
+    ],
+    "answer": "ABD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 101,
+    "type": "multiple",
+    "question": "创新支付的发展方向包括？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 多层次保障"
+      },
+      {
+        "key": "B",
+        "text": "B. 企业团购"
+      },
+      {
+        "key": "C",
+        "text": "C. 直联直付"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 102,
+    "type": "multiple",
+    "question": "从哪些维度探索同质化诊疗的发力点？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 左右“破壁”院内不同科室间"
+      },
+      {
+        "key": "B",
+        "text": "B. 上下“破壁”不同层级医院之间"
+      },
+      {
+        "key": "C",
+        "text": "C. 内外“破壁”医院和药店之间"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 103,
+    "type": "multiple",
+    "question": "创新支付中“多层次保障”的具体表现是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 惠民保从拓展覆盖面到深度开发，包括差异化定价和保障待遇等"
+      },
+      {
+        "key": "B",
+        "text": "B. 取消基本医保"
+      },
+      {
+        "key": "C",
+        "text": "C. 丙目录/商业健康保险目录ABCDE形成多层级药品目录体系，将更广泛的选择权交给消费者"
+      },
+      {
+        "key": "D",
+        "text": "D. 统一全国医保价格"
+      }
+    ],
+    "answer": "AC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 104,
+    "type": "multiple",
+    "question": "​​CE-O业务增量的关键驱动因素和关键阻碍因素是什么？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 适应症"
+      },
+      {
+        "key": "B",
+        "text": "B. 支付"
+      },
+      {
+        "key": "C",
+        "text": "C. 诊疗场景连续性"
+      },
+      {
+        "key": "D",
+        "text": "D. 医生学术推广力度"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 105,
+    "type": "multiple",
+    "question": "罗氏参与了8轮国家医保谈判，创造了以下哪些价值？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. 生命价值"
+      },
+      {
+        "key": "B",
+        "text": "B. 社会价值（推动肿瘤学科发展）"
+      },
+      {
+        "key": "C",
+        "text": "C. 经济价值"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 106,
+    "type": "multiple",
+    "question": "肿瘤产品战略方向的制定需明确哪些关键维度？​​（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "A. ​​竞品在医保市场的价格降幅​​"
+      },
+      {
+        "key": "B",
+        "text": "B. ​​解决哪一类肿瘤患者的哪一类痛点​​"
+      },
+      {
+        "key": "C",
+        "text": "C. ​Where to play——目标渠道场景​​和目标支付场景"
+      },
+      {
+        "key": "D",
+        "text": "D. ​​How to play——资源匹配"
+      }
+    ],
+    "answer": "BCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 107,
+    "type": "multiple",
+    "question": "下面关于赫双妥更省钱的说法正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "赫双妥负荷剂量对比原研药IV价格降低28%，对比Bx价格降低10%"
+      },
+      {
+        "key": "B",
+        "text": "赫双妥维持剂量对比原研药IV价格降低33%，对比Bx价格降低17%"
+      },
+      {
+        "key": "C",
+        "text": "赫双妥维持剂量对比原研药IV价格降低28%，对比Bx价格降低10%"
+      },
+      {
+        "key": "D",
+        "text": "赫双妥负荷剂量对比原研药IV价格降低33%，对比Bx价格降低17%"
+      }
+    ],
+    "answer": "CD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 108,
+    "type": "multiple",
+    "question": "帕妥珠曲妥珠单抗注射液（皮下注射）和静脉注射的安全性对比，以下说法正确的有？",
+    "options": [
+      {
+        "key": "A",
+        "text": "皮下给药无需置管，创伤小，减少长期静脉输注风险"
+      },
+      {
+        "key": "B",
+        "text": "经淋巴吸收，免疫增效，平稳达峰更安全"
+      },
+      {
+        "key": "C",
+        "text": "总体安全性与帕妥珠单抗+曲妥珠单抗静脉注射剂安全性相当"
+      },
+      {
+        "key": "D",
+        "text": "以上均错误"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 109,
+    "type": "multiple",
+    "question": "赫双妥获批的规格是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "600 mg 帕妥珠单抗，1,200 mg 曲妥珠单抗，\n和30,000单位透明质酸酶(15 mL)"
+      },
+      {
+        "key": "B",
+        "text": "600 mg 帕妥珠单抗，600 mg 曲妥珠单抗，\n和20,000单位透明质酸酶(10 mL)"
+      },
+      {
+        "key": "C",
+        "text": "1,200 mg 帕妥珠单抗，600 mg曲妥珠单抗，\n和30,000单位透明质酸酶(15 mL)"
+      },
+      {
+        "key": "D",
+        "text": "600 mg 帕妥珠单抗，600 mg 曲妥珠单抗，\n和30,000单位透明质酸酶(10 mL)"
+      }
+    ],
+    "answer": "BC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 110,
+    "type": "multiple",
+    "question": "ECC 皮下生态的\"三省\"关键信息是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "省钱—价格更低，节约医保基金"
+      },
+      {
+        "key": "B",
+        "text": "省空间—释放床位资源"
+      },
+      {
+        "key": "C",
+        "text": "省时间—5-8分钟完成治疗"
+      },
+      {
+        "key": "D",
+        "text": "省效能—使用更少的耗材能源"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 111,
+    "type": "multiple",
+    "question": "Ang-2的作用是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "DME和RVO中，防止视网膜血管的周细胞丢失，稳定视网膜血管"
+      },
+      {
+        "key": "B",
+        "text": "抑制新生血管形"
+      },
+      {
+        "key": "C",
+        "text": "减少炎症和血管渗漏"
+      },
+      {
+        "key": "D",
+        "text": "抑制血管渗漏"
+      }
+    ],
+    "answer": "AC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 112,
+    "type": "multiple",
+    "question": "法瑞西单抗注射液目前医保申报适应症为( )：",
+    "options": [
+      {
+        "key": "A",
+        "text": "糖尿病性黄斑水肿（DME）"
+      },
+      {
+        "key": "B",
+        "text": "新生血管性(湿性)年龄相关性黄斑病变(nAMD)"
+      },
+      {
+        "key": "C",
+        "text": "继发于视网膜分支静脉阻塞(BRVO)的黄斑水肿"
+      },
+      {
+        "key": "D",
+        "text": "早产儿视网膜病变（ROP）"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 113,
+    "type": "multiple",
+    "question": "法瑞西单抗在国外获得了哪些权威指南一线推荐？",
+    "options": [
+      {
+        "key": "A",
+        "text": "2023糖尿病性黄斑水肿指南（澳大利亚）"
+      },
+      {
+        "key": "B",
+        "text": "2024新生血管性年龄相关性黄斑变性指南（日本）"
+      },
+      {
+        "key": "C",
+        "text": "2024AAO年龄相关性黄斑变性临床实践指南（美国）"
+      },
+      {
+        "key": "D",
+        "text": "2024AAO糖尿病视网膜病变临床实践指南（美国）"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 114,
+    "type": "multiple",
+    "question": "法瑞西单抗2025年的产品策略是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "准入必胜"
+      },
+      {
+        "key": "B",
+        "text": "1L观念必胜"
+      },
+      {
+        "key": "C",
+        "text": "医保必胜战"
+      },
+      {
+        "key": "D",
+        "text": "1L行为必胜战"
+      }
+    ],
+    "answer": "ABD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 115,
+    "type": "multiple",
+    "question": "PIK3CA突变检测的主要方法包括？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "PCR"
+      },
+      {
+        "key": "B",
+        "text": "NGS"
+      },
+      {
+        "key": "C",
+        "text": "免疫组化"
+      },
+      {
+        "key": "D",
+        "text": "FISH"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 116,
+    "type": "multiple",
+    "question": "伊赫莱®的作用机制包括？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "PI3Kα抑制剂"
+      },
+      {
+        "key": "B",
+        "text": "突变体降解剂"
+      },
+      {
+        "key": "C",
+        "text": "mTOR抑制剂"
+      },
+      {
+        "key": "D",
+        "text": "高选择性靶向PIK3CA突变"
+      }
+    ],
+    "answer": "ABD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 117,
+    "type": "multiple",
+    "question": "伊赫莱®的获批时间是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "2024年10月"
+      },
+      {
+        "key": "B",
+        "text": "2024年3月"
+      },
+      {
+        "key": "C",
+        "text": "2025年3月"
+      },
+      {
+        "key": "D",
+        "text": "2026年1月"
+      }
+    ],
+    "answer": "AC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 118,
+    "type": "multiple",
+    "question": "伊赫莱®的市场推广核心信息包括？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "首个且唯一PI3Kα抑制剂"
+      },
+      {
+        "key": "B",
+        "text": "双倍PFS获益"
+      },
+      {
+        "key": "C",
+        "text": "中美双重突破性疗法（BTD）认证"
+      },
+      {
+        "key": "D",
+        "text": "适用于所有HR+乳腺癌"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 119,
+    "type": "multiple",
+    "question": "特泊替尼适用于？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "​​一线治疗​​"
+      },
+      {
+        "key": "B",
+        "text": "​​二线治疗​​"
+      },
+      {
+        "key": "C",
+        "text": "​​脑转移患者​​"
+      },
+      {
+        "key": "D",
+        "text": "​​轻度肝肾功能不全者（无需调剂量）​​"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 120,
+    "type": "multiple",
+    "question": "特泊替尼相比其他MET TKI的核心优势包括？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "​​最长OS/PFS数据（尤其亚裔）​​"
+      },
+      {
+        "key": "B",
+        "text": "​​≥3级AE发生率最低​​"
+      },
+      {
+        "key": "C",
+        "text": "​​NCCN唯一推荐脑膜转移用药​​"
+      },
+      {
+        "key": "D",
+        "text": "需肝功能不全患者调整剂量"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 121,
+    "type": "multiple",
+    "question": "影响准入的竞品短板是？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "价格更高"
+      },
+      {
+        "key": "B",
+        "text": "​​肝毒性（赛沃替尼）​​"
+      },
+      {
+        "key": "C",
+        "text": "​​AE谱广（谷美替尼）​​"
+      },
+      {
+        "key": "D",
+        "text": "​​脑转移数据不足​​"
+      }
+    ],
+    "answer": "BCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 122,
+    "type": "multiple",
+    "question": "特泊替尼的差异化定位是？（多选）",
+    "options": [
+      {
+        "key": "A",
+        "text": "​​疗效更优：\n首个OS超30个月MET TKI​​"
+      },
+      {
+        "key": "B",
+        "text": "​​双指南优选推荐​​"
+      },
+      {
+        "key": "C",
+        "text": "安全性更优：≥3级不良反应发生率远低于其他同类TKI"
+      },
+      {
+        "key": "D",
+        "text": "口服生物利用度最高"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 123,
+    "type": "multiple",
+    "question": "建设ECC有什么好处？",
+    "options": [
+      {
+        "key": "A",
+        "text": "基于日间医疗的发展，优化肿瘤患者的就医路径，减少患者院内停留时间"
+      },
+      {
+        "key": "B",
+        "text": "为医院内部管理提质增效，优化医护工作流程"
+      },
+      {
+        "key": "C",
+        "text": "借助互联网，实现院内外诊疗平台一体化，实现院内与社区联动，最终在分级诊疗网络下实现同质化治疗"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 124,
+    "type": "multiple",
+    "question": "特泊替尼有哪些优势？",
+    "options": [
+      {
+        "key": "A",
+        "text": "CSCO指南/NCCN指南双优选推荐"
+      },
+      {
+        "key": "B",
+        "text": "唯一中位OS超30个月的MET抑制剂"
+      },
+      {
+        "key": "C",
+        "text": "全线医保/\n全线适应症"
+      },
+      {
+        "key": "D",
+        "text": "安全安心"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 125,
+    "type": "multiple",
+    "question": "针对特泊替尼安全性的描述，下面哪一项正确？",
+    "options": [
+      {
+        "key": "A",
+        "text": "≥3级TRAE最低"
+      },
+      {
+        "key": "B",
+        "text": "≥3级外周水肿发生率最低"
+      },
+      {
+        "key": "C",
+        "text": "任意级别的外周水肿发生率最低"
+      },
+      {
+        "key": "D",
+        "text": "轻度肝损伤患者就需要停药"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 126,
+    "type": "multiple",
+    "question": "关于DLBCL的疾病特征，描述正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "是非霍奇金淋巴瘤中最常见的类型"
+      },
+      {
+        "key": "B",
+        "text": "一线治疗是患者治愈可能性最高的治疗机会"
+      },
+      {
+        "key": "C",
+        "text": "后线治疗的治愈率仅~5-20%"
+      },
+      {
+        "key": "D",
+        "text": "WHO指出DLBCL是可治愈性疾病"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 127,
+    "type": "multiple",
+    "question": "以下哪些是ADC药物相比传统化疗和单克隆抗体治疗的先进之处？",
+    "options": [
+      {
+        "key": "A",
+        "text": "治疗窗口更窄"
+      },
+      {
+        "key": "B",
+        "text": "治疗窗口更广"
+      },
+      {
+        "key": "C",
+        "text": "脱靶效应更少"
+      },
+      {
+        "key": "D",
+        "text": "可使用效力更高的细胞毒药物"
+      }
+    ],
+    "answer": "BCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 128,
+    "type": "multiple",
+    "question": "以下对于优罗华联合方案的安全性和耐受性描述正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "增效不增毒"
+      },
+      {
+        "key": "B",
+        "text": "较R-CHOP方案依从性更佳"
+      },
+      {
+        "key": "C",
+        "text": "特殊人群无需调整剂量"
+      },
+      {
+        "key": "D",
+        "text": "与R-CHOP方案依从性相当"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 129,
+    "type": "multiple",
+    "question": "以下哪些是Pola所采用的单克隆抗体的正确描述？",
+    "options": [
+      {
+        "key": "A",
+        "text": "人鼠嵌合型抗体"
+      },
+      {
+        "key": "B",
+        "text": "人源化抗体"
+      },
+      {
+        "key": "C",
+        "text": "Fc段免疫杀伤效应增强的抗体"
+      },
+      {
+        "key": "D",
+        "text": "Fc段改造而免疫效应不活跃的抗体"
+      }
+    ],
+    "answer": "BD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 130,
+    "type": "multiple",
+    "question": "优罗华在中国获批的适应症是",
+    "options": [
+      {
+        "key": "A",
+        "text": "本品联合利妥昔单抗、环磷酰胺、多柔比星和泼尼松适用于治疗既往未经治疗的弥漫大 B 细胞淋巴瘤（DLBCL）成人患者。"
+      },
+      {
+        "key": "B",
+        "text": "本品联合苯达莫司汀和利妥昔单抗适用于不适合接受造血干细胞移植的复发或难治性弥漫大 B 细胞淋巴瘤（DLBCL）成人患者。"
+      },
+      {
+        "key": "C",
+        "text": "本品联合利妥昔单抗、环磷酰胺、多柔比星和泼尼松适用于治疗复发或难治性弥漫大 B 细胞淋巴瘤（DLBCL）成人患者。"
+      },
+      {
+        "key": "D",
+        "text": "基于完全缓解率和缓解持续时间附条件批准复发或难治性 DLBCL 适应症。"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 131,
+    "type": "multiple",
+    "question": "血液科高质量发展面临的挑战，以下描述正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "血液诊疗服务供给不平衡不充分"
+      },
+      {
+        "key": "B",
+        "text": "诊疗模式导致CMI低"
+      },
+      {
+        "key": "C",
+        "text": "DRG/DIP支付标准低"
+      },
+      {
+        "key": "D",
+        "text": "病理检测要求高"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 132,
+    "type": "multiple",
+    "question": "格菲妥单抗疗效更好的优势人群?",
+    "options": [
+      {
+        "key": "A",
+        "text": "基础状态好（fit）"
+      },
+      {
+        "key": "B",
+        "text": "3L"
+      },
+      {
+        "key": "C",
+        "text": "非难治性"
+      },
+      {
+        "key": "D",
+        "text": "非大包块（＜6cm）"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 133,
+    "type": "multiple",
+    "question": "格菲妥单抗参照药强化选择Pola-BR的理由",
+    "options": [
+      {
+        "key": "A",
+        "text": "Pola-BR与Glofit 适应症几乎相同"
+      },
+      {
+        "key": "B",
+        "text": "Pola-BR在医保目录内"
+      },
+      {
+        "key": "C",
+        "text": "Pola-BR是Glofit国际医保准入常用的参照药"
+      },
+      {
+        "key": "D",
+        "text": "可以更好的支持Glofit 医保准入价格"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 134,
+    "type": "multiple",
+    "question": "格菲妥单抗相比CAR-T，有以下哪些特点？",
+    "options": [
+      {
+        "key": "A",
+        "text": "即诊即用"
+      },
+      {
+        "key": "B",
+        "text": "临床可获得性高"
+      },
+      {
+        "key": "C",
+        "text": "需要制备周期"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 135,
+    "type": "multiple",
+    "question": "高罗华的市场推广核心信息包括？",
+    "options": [
+      {
+        "key": "A",
+        "text": "即用型TCE：激活、扩增、重定向自身T细胞杀伤肿瘤；目前唯一2:1结构、CD20xCD3双抗,提升40倍抗肿瘤效力"
+      },
+      {
+        "key": "B",
+        "text": "提升治愈：深度缓解、快速起效、持久获益、安全性可控"
+      },
+      {
+        "key": "C",
+        "text": "固定周期：共给药12个周期(约8.3个月)"
+      },
+      {
+        "key": "D",
+        "text": "替代一线治疗"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 136,
+    "type": "multiple",
+    "question": "中国《儿童流行性感冒的疫苗预防和抗病毒药物应用的实践指南（2024版）》对玛巴洛沙韦哪些优势进行了推荐",
+    "options": [
+      {
+        "key": "A",
+        "text": "首次作出对玛巴洛沙韦干混悬剂的推荐"
+      },
+      {
+        "key": "B",
+        "text": "推荐≥5岁患者使用玛巴洛沙韦抗流感病毒治疗(与奥司他韦同等级推荐)"
+      },
+      {
+        "key": "C",
+        "text": "治疗乙型流感，可以优先考虑选用玛巴洛沙韦治疗"
+      },
+      {
+        "key": "D",
+        "text": "在奥司他韦不耐受的人群中，可以考虑5岁以下儿童给与玛巴洛沙韦治疗"
+      }
+    ],
+    "answer": "ABCDE",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 137,
+    "type": "multiple",
+    "question": "III期临床试验CENTERSTONE证实了哪些结论",
+    "options": [
+      {
+        "key": "A",
+        "text": "研究显示：流感感染者单次口服玛巴洛沙韦后，总体人群其未接受治疗的家庭成员感染病毒的概率降低了32%"
+      },
+      {
+        "key": "B",
+        "text": "研究显示：流感感染者单次口服玛巴洛沙韦后，亚裔人群其未接受治疗的家庭成员感染病毒的概率降低了49%"
+      },
+      {
+        "key": "C",
+        "text": "玛巴洛沙韦的耐受性良好"
+      },
+      {
+        "key": "D",
+        "text": "玛巴洛沙韦治疗流感和流感暴露后预防的有效性"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 138,
+    "type": "multiple",
+    "question": "玛巴洛沙韦干混悬剂的给药方式是：",
+    "options": [
+      {
+        "key": "A",
+        "text": "A.口服"
+      },
+      {
+        "key": "B",
+        "text": "B.肌肉注射"
+      },
+      {
+        "key": "C",
+        "text": "C.静脉注射"
+      },
+      {
+        "key": "D",
+        "text": "D.肠内给药"
+      }
+    ],
+    "answer": "AD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 139,
+    "type": "multiple",
+    "question": "对比片剂，玛巴洛沙韦干混悬剂有哪些特点",
+    "options": [
+      {
+        "key": "A",
+        "text": "草莓口味，干混悬剂型，提升吞咽困难及服药困难患儿依从性"
+      },
+      {
+        "key": "B",
+        "text": "增加肠内给药方案，解决特殊患儿用药需求"
+      },
+      {
+        "key": "C",
+        "text": "对于<20kg体重患儿，可以实现根据体重精准给药"
+      },
+      {
+        "key": "D",
+        "text": "提供安全有效的治疗选择"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 140,
+    "type": "multiple",
+    "question": "《流行性感冒诊疗方案（2025年版）》与2020年版对比，有哪些变化？",
+    "options": [
+      {
+        "key": "A",
+        "text": "新版方案新增玛巴洛沙韦、法维拉韦两种药物的推荐"
+      },
+      {
+        "key": "B",
+        "text": "增加了临床轻型和中型分型标准，完善了重型和危重型标准"
+      },
+      {
+        "key": "C",
+        "text": "明确建议联合应用相同作用机制的抗病毒药物"
+      },
+      {
+        "key": "D",
+        "text": "增加了金刚烷胺、金刚乙胺两种药物的推荐"
+      }
+    ],
+    "answer": "AB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 141,
+    "type": "multiple",
+    "question": "以下关于玛巴洛沙韦和奥司他韦的描述正确的是？",
+    "options": [
+      {
+        "key": "A",
+        "text": "奥司他韦是在病毒复制出芽阶段发挥作用，因此细胞中仍然有大量新病毒生成"
+      },
+      {
+        "key": "B",
+        "text": "玛巴洛沙韦是在病毒RNA复制阶段发挥作用，因此细胞中基本没有新病毒生成"
+      },
+      {
+        "key": "C",
+        "text": "玛巴洛沙韦在治疗后24h显著降低病毒滴度，而奥司他韦需要72h"
+      },
+      {
+        "key": "D",
+        "text": "奥司他韦和玛巴洛沙韦治疗流感，均能有效减少流感传播"
+      }
+    ],
+    "answer": "ABC",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 142,
+    "type": "multiple",
+    "question": "以下哪些属于医院大科研管理的概念范畴？",
+    "options": [
+      {
+        "key": "A",
+        "text": "学科建设"
+      },
+      {
+        "key": "B",
+        "text": "人才培养"
+      },
+      {
+        "key": "C",
+        "text": "成果转化"
+      },
+      {
+        "key": "D",
+        "text": "科研项目"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 143,
+    "type": "multiple",
+    "question": "医疗机构内设的哪些部门会跟科研管理工作相关？",
+    "options": [
+      {
+        "key": "A",
+        "text": "科研处"
+      },
+      {
+        "key": "B",
+        "text": "机构办"
+      },
+      {
+        "key": "C",
+        "text": "内审办"
+      },
+      {
+        "key": "D",
+        "text": "财务科"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 144,
+    "type": "multiple",
+    "question": "以下哪些属于纵向课题范畴？",
+    "options": [
+      {
+        "key": "A",
+        "text": "国自然基金"
+      },
+      {
+        "key": "B",
+        "text": "科委研究基金"
+      },
+      {
+        "key": "C",
+        "text": "IIT"
+      },
+      {
+        "key": "D",
+        "text": "卫健委研究项目"
+      }
+    ],
+    "answer": "ABD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 145,
+    "type": "multiple",
+    "question": "以下哪些属于医院科研成果的主要类型？",
+    "options": [
+      {
+        "key": "A",
+        "text": "学术论文"
+      },
+      {
+        "key": "B",
+        "text": "专利"
+      },
+      {
+        "key": "C",
+        "text": "教材著作"
+      },
+      {
+        "key": "D",
+        "text": "作价投资"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 146,
+    "type": "multiple",
+    "question": "小罗智多星主要包含哪几个功能模块？",
+    "options": [
+      {
+        "key": "A",
+        "text": "智搜"
+      },
+      {
+        "key": "B",
+        "text": "智读"
+      },
+      {
+        "key": "C",
+        "text": "智答"
+      },
+      {
+        "key": "D",
+        "text": "智写"
+      }
+    ],
+    "answer": "ABCD",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 147,
+    "type": "multiple",
+    "question": "利司扑兰配制需要使用的液体体积为",
+    "options": [],
+    "answer": "ML",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 148,
+    "type": "single",
+    "question": "神经领域按时复购的定义：按照计算的下一次购药日期不超过7   天以内",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 149,
+    "type": "single",
+    "question": "2025年眼科关键信息一句话是眼底致盲不可逆，坚持治疗不能停",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 150,
+    "type": "single",
+    "question": "罗视佳适应症中，糖尿病性黄斑水肿（DME）初始治疗为几针？4针",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 151,
+    "type": "single",
+    "question": "赫双妥的“三省”是哪三省？省钱、省时间、省空间",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 152,
+    "type": "multiple",
+    "question": "赫双妥首次治疗应该使用多少毫升剂量？",
+    "options": [],
+    "answer": "ML",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 153,
+    "type": "multiple",
+    "question": "伊那利塞（伊赫莱）每日的推荐剂量是几mg?15ml",
+    "options": [],
+    "answer": "MG",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 154,
+    "type": "single",
+    "question": "2025年血液优罗华DOT 4 管理占比的目标是什么？9mg",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 155,
+    "type": "single",
+    "question": "约多少比例的DLBCL患者在治疗结束后2年内可能会面临复发40%",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 156,
+    "type": "single",
+    "question": "针对T100 结对子医院需要区域持续支持开展医生和药师的互动活动，这个频次是__ 月/次？3月/次",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 157,
+    "type": "single",
+    "question": "研究显示，较全球人群，亚洲患者使用Pola-R-CHP方案，病进展/复发/死亡风险降低_27__%",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 158,
+    "type": "single",
+    "question": "针对重点门店社群管理，AI患教内容传递，频次是_1_ 次/周？",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 159,
+    "type": "single",
+    "question": "新业极每个月数据统计的时间段是上月21号到本月20号",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 160,
+    "type": "single",
+    "question": "新业极数据区域第一轮提报总部的截止时间是25号",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 161,
+    "type": "single",
+    "question": "在BC数据工具中，最近一次购药时间距离最新月报时间（某月20日）大于 __42__天，患者存续状态会判定为“脱组”？",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 162,
+    "type": "single",
+    "question": "NS案例：患者3月7日来药店购药1瓶，按照年龄体重计算下一次购药时间是4月7日，患者在2025/5/7之前没来购药，算为脱落",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 163,
+    "type": "single",
+    "question": "NS案例：药店统计累计建档人数20人，已转渠道人数5人，已脱落人数3人，该店目前活跃人数多少12人",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 164,
+    "type": "single",
+    "question": "NS案例：药店一共有5名活跃患者，其中5月应该来购药的是3人，这3人其中1人5月转渠道了，2人来购药了，那5月当月按时复购的人数是2人，未按时复购的是0人",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 165,
+    "type": "single",
+    "question": "社商/商保覆盖人数2030年目标：5亿",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 166,
+    "type": "single",
+    "question": "中国科技成果转化率仅 0.3",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 167,
+    "type": "single",
+    "question": "中国医疗支出占GDP百分比2023约为0.07",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 168,
+    "type": "single",
+    "question": "MCE团队的核心定位是什么？八爪鱼和百宝箱​",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 169,
+    "type": "single",
+    "question": "9针医保支付限定下，法瑞西单抗是唯一医保惠___3____年的药物？（填写正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 170,
+    "type": "single",
+    "question": "法瑞西单抗创新双通路机制，可维持更长治疗间隔，是单通路药物的_____4_____倍治疗间隔（填写正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 171,
+    "type": "single",
+    "question": "公司大力推动ECC的建设，其中ECC的中文全称是：便捷治愈中心_______",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 172,
+    "type": "single",
+    "question": "中国HR+/HER2-乳腺癌患者中PIK3CA突变率约为___44__%（请填写正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 173,
+    "type": "single",
+    "question": "作为进口药，医保前价格15,120元/盒，比3个国产抑制剂价格更低，医保后日花费低至约__150___元，更高可及性、依从性。（请填写金额，正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 174,
+    "type": "single",
+    "question": "对于既往未经治疗的弥漫大B细胞淋巴瘤患者，优罗华联合R-CHP需__6__几个治疗周期？（请填写正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 175,
+    "type": "multiple",
+    "question": "优罗华是第（3）代ADC药物，作用靶点是（CD79b）？",
+    "options": [],
+    "answer": "CDB",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 176,
+    "type": "multiple",
+    "question": "针对DLBCL患者，优高组合拳的策略是：（1L ）患者用优罗华,( 2L+ )患者用高罗华",
+    "options": [],
+    "answer": "LL",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 177,
+    "type": "multiple",
+    "question": "复发/难治DLBCL患者优先推荐（ TCE ）疗法",
+    "options": [],
+    "answer": "TCE",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 178,
+    "type": "single",
+    "question": "格菲妥单抗的给药周期为__21__天一个周期。",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  },
+  {
+    "id": 179,
+    "type": "single",
+    "question": "玛巴洛沙韦干混悬剂中国获批适用的年龄是：_5___岁~_12__岁（填写正整数）",
+    "options": [],
+    "answer": "A",
+    "analysis": "罗氏官方权威深度考点解析"
+  }
+];
+
+    const LOCAL_STORAGE_KEY = 'ROCHE_REAL_EXAM_STORE_FINAL';
+    let questionBank = [];
+    let currentIndex = 0;
+    let userAnswers = {};
+    let isSubmittedCurrent = false;
+    let wrongQuestionIds = [];
+    let qrcodeInstance = null;
+    let onlineBaseUrl = "https://stefanie2027.github.io/exam/";
+
+    // 初始化题库：优先读取已刻录的 HARDCODED_BANK，其次读取 LocalStorage 缓存
+    function initQuestionData() {
+      if (HARDCODED_BANK && Array.isArray(HARDCODED_BANK) && HARDCODED_BANK.length > 0) {
+        questionBank = HARDCODED_BANK;
+        setBankSourceUI(`已刻录固化(${HARDCODED_BANK.length}题)`, 'bg-emerald-100 text-emerald-800');
+        return;
+      }
+
+      try {
+        const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            questionBank = parsed;
+            setBankSourceUI(`已读取本地缓存(${parsed.length}题)`, 'bg-blue-100 text-blue-800');
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('缓存读取失败', e);
+      }
+
+      // 默认初始引导提示
+      questionBank = [
+        {
+          id: 1,
+          type: 'single',
+          question: '请在左侧点击【重新导入 Excel 题库表格】，载入《考试题库_2.xlsx》(179题)',
+          options: [
+            { key: 'A', text: '点击左侧虚线框选择电脑里的 Excel 表格' },
+            { key: 'B', text: '页面会立即载入完整的 179 道题目' },
+            { key: 'C', text: '点击绿色的【下载永久内置题库的 index.html】' },
+            { key: 'D', text: '把下载后的 index.html 传上 GitHub，所有人扫码都能看到 179 题' }
+          ],
+          answer: 'ABCD',
+          analysis: '通过内置的导出引擎，浏览器会把 179 道题的数据直接编译写入 HTML 源码，彻底避免换设备还原为 10 题的问题。'
+        }
+      ];
+      setBankSourceUI('请导入179题', 'bg-amber-100 text-amber-800');
+    }
+
+    function setBankSourceUI(text, colorClass) {
+      const tag = document.getElementById('bankSourceTag');
+      if (tag) {
+        tag.textContent = text;
+        tag.className = `ml-2 text-[10px] px-2 py-0.5 rounded-full font-bold ${colorClass}`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initQuestionData();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobileDevice || urlParams.get('mode') === 'quiz') {
+        const desktopPanel = document.getElementById('desktopPanel');
+        if (desktopPanel) desktopPanel.classList.add('hidden');
+      }
+
+      if (urlParams.get('autostart') === '1' && questionBank.length > 1) {
+        startQuiz();
+      }
+
+      updateAllCounters();
+      initQRCode();
+      bindEvents();
+    });
+
+    function updateAllCounters() {
+      const total = questionBank.length;
+      document.getElementById('sidebarQuestionCount').textContent = total;
+      document.getElementById('homeTotalCount').textContent = total;
+      document.getElementById('startBtnCount').textContent = total;
+      document.getElementById('cardNavNumber').textContent = `${currentIndex + 1}/${total}`;
+      document.getElementById('headerSubtitle').textContent = `共 ${total} 道题 · 即时正解`;
+    }
+
+    function initQRCode() {
+      const qrTarget = document.getElementById('qrcode');
+      qrTarget.innerHTML = '';
+
+      const cleanUrl = onlineBaseUrl.split('?')[0].replace(/\/+$/, '') + '/';
+      const scanUrl = cleanUrl + '?mode=quiz&autostart=1';
+
+      qrcodeInstance = new QRCode(qrTarget, {
+        text: scanUrl,
+        width: 140,
+        height: 140,
+        colorDark: "#1d4ed8",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    function bindEvents() {
+      document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+      document.getElementById('headerRestartBtn').addEventListener('click', () => {
+        if (confirm('确定要重新开始测评吗？')) resetAllQuiz();
+      });
+      document.getElementById('restartAllBtn').addEventListener('click', resetAllQuiz);
+
+      // 答题与解析
+      document.getElementById('submitAnswerBtn').addEventListener('click', submitCurrentAnswer);
+      document.getElementById('nextQuestionBtn').addEventListener('click', gotoNextQuestion);
+      document.getElementById('prevQuestionBtn').addEventListener('click', gotoPrevQuestion);
+      document.getElementById('retryWrongOnlyBtn').addEventListener('click', startWrongPractice);
+
+      // 题卡抽屉
+      document.getElementById('toggleSheetBtn').addEventListener('click', openSheetModal);
+      document.getElementById('closeSheetModalBtn').addEventListener('click', closeSheetModal);
+      document.getElementById('sheetModal').addEventListener('click', (e) => {
+        if (e.target.id === 'sheetModal') closeSheetModal();
+      });
+
+      // 网址与二维码
+      document.getElementById('updateUrlBtn').addEventListener('click', () => {
+        const val = document.getElementById('targetUrlInput').value.trim();
+        if (!val) return showToast('请输入有效的答题网址');
+        onlineBaseUrl = val;
+        initQRCode();
+        showToast('微信答题二维码已更新！');
+      });
+
+      document.getElementById('copyUrlBtn').addEventListener('click', () => {
+        const cleanUrl = onlineBaseUrl.split('?')[0].replace(/\/+$/, '') + '/';
+        const scanUrl = cleanUrl + '?mode=quiz&autostart=1';
+        navigator.clipboard.writeText(scanUrl).then(() => {
+          showToast('答题链接已复制！微信发送即可打开');
+        }).catch(() => {
+          prompt('请复制答题网址：', scanUrl);
+        });
+      });
+
+      document.getElementById('downloadQrBtn').addEventListener('click', () => {
+        const qrImg = document.querySelector('#qrcode img');
+        if (qrImg && qrImg.src) {
+          const a = document.createElement('a');
+          a.href = qrImg.src;
+          a.download = `罗氏题库_微信扫码答题二维码.png`;
+          a.click();
+          showToast('二维码已保存！');
+        } else {
+          showToast('二维码生成中，请稍候');
+        }
+      });
+
+      // 上传 Excel 文件并自动解析
+      document.getElementById('excelFileInput').addEventListener('change', handleExcelUpload);
+
+      // 导出已刻录真实题库的 HTML 文件
+      document.getElementById('exportEmbeddedHtmlBtn').addEventListener('click', exportEmbeddedHtml);
+
+      // 清除本地缓存
+      document.getElementById('resetToDefaultBtn').addEventListener('click', () => {
+        if (confirm('确定要清除本地缓存的题库吗？')) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          location.reload();
+        }
+      });
+    }
+
+    /**
+     * ============================================================
+     * 高容错 Excel 解析引擎（自适应各种表头格式）
+     * ============================================================
+     */
+    function handleExcelUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+          if (!rawRows || rawRows.length < 2) {
+            showToast('未在 Excel 中识别到试题内容');
+            return;
+          }
+
+          // 寻找表头所在行
+          let headerRowIdx = 0;
+          let colIdxQuestion = -1, colIdxA = -1, colIdxB = -1, colIdxC = -1, colIdxD = -1, colIdxAns = -1, colIdxAna = -1;
+
+          for (let r = 0; r < Math.min(5, rawRows.length); r++) {
+            const row = rawRows[r].map(c => String(c).trim());
+            row.forEach((cell, idx) => {
+              if (/题干|题目|试题|内容|Question/i.test(cell) && colIdxQuestion === -1) colIdxQuestion = idx;
+              if (/^(选项\s*A|A$|A选项)/i.test(cell) && colIdxA === -1) colIdxA = idx;
+              if (/^(选项\s*B|B$|B选项)/i.test(cell) && colIdxB === -1) colIdxB = idx;
+              if (/^(选项\s*C|C$|C选项)/i.test(cell) && colIdxC === -1) colIdxC = idx;
+              if (/^(选项\s*D|D$|D选项)/i.test(cell) && colIdxD === -1) colIdxD = idx;
+              if (/答案|正确答案|标准答案|Key/i.test(cell) && colIdxAns === -1) colIdxAns = idx;
+              if (/解析|考点|解释|说明|Analysis/i.test(cell) && colIdxAna === -1) colIdxAna = idx;
+            });
+
+            if (colIdxQuestion !== -1 && (colIdxA !== -1 || colIdxAns !== -1)) {
+              headerRowIdx = r;
+              break;
+            }
+          }
+
+          if (colIdxQuestion === -1) {
+            colIdxQuestion = 0; colIdxA = 1; colIdxB = 2; colIdxC = 3; colIdxD = 4; colIdxAns = 5; colIdxAna = 6;
+            headerRowIdx = 0;
+          }
+
+          const parsedList = [];
+          for (let r = headerRowIdx + 1; r < rawRows.length; r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+
+            const qText = String(row[colIdxQuestion] || '').trim();
+            if (!qText) continue;
+
+            const optA = String(row[colIdxA] || '').trim();
+            const optB = String(row[colIdxB] || '').trim();
+            const optC = String(row[colIdxC] || '').trim();
+            const optD = String(row[colIdxD] || '').trim();
+            let ans = String(row[colIdxAns] || 'A').trim().toUpperCase().replace(/[^A-Z]/g, '');
+            const ana = String(row[colIdxAna] || '罗氏官方权威深度考点解析').trim();
+
+            const options = [];
+            if (optA) options.push({ key: 'A', text: optA });
+            if (optB) options.push({ key: 'B', text: optB });
+            if (optC) options.push({ key: 'C', text: optC });
+            if (optD) options.push({ key: 'D', text: optD });
+
+            let qType = 'single';
+            if (ans.length > 1) {
+              qType = 'multiple';
+            } else if (options.length === 2 && (optA.includes('正确') || optA.includes('对') || optA.toLowerCase() === 'true')) {
+              qType = 'judge';
+            }
+
+            parsedList.push({
+              id: parsedList.length + 1,
+              type: qType,
+              question: qText,
+              options: options,
+              answer: ans || 'A',
+              analysis: ana || '暂无深度解析'
+            });
+          }
+
+          if (parsedList.length === 0) {
+            showToast('未能提取有效题目，请确认 Excel 包含题干和选项');
+            return;
+          }
+
+          questionBank = parsedList;
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsedList));
+          
+          setBankSourceUI(`已载入真实题库(${parsedList.length}题)`, 'bg-emerald-100 text-emerald-800');
+
+          updateAllCounters();
+          resetAllQuiz();
+          showToast(`成功识别 ${parsedList.length} 题！请点击下方绿色按钮下载代码`);
+        } catch (err) {
+          console.error(err);
+          showToast('Excel 文件解析失败，请检查文件格式');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      e.target.value = '';
+    }
+
+    /**
+     * ============================================================
+     * 关键函数：把内存里的 179 题精准刻录写入 index.html 并自动下载
+     * ============================================================
+     */
+    function exportEmbeddedHtml() {
+      if (!questionBank || questionBank.length <= 1) {
+        showToast('请先上传包含 179 题的 Excel 表格');
+        return;
+      }
+
+      // 获取当前整个页面的 HTML 结构
+      let fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+      // 将当前的 179 题格式化为 JSON 字符串
+      const bankJsonString = JSON.stringify(questionBank, null, 2);
+
+      // 用正则表达式将 HARDCODED_BANK 精确替换为当前的 179 题数据
+      fullHtml = fullHtml.replace(
+        /let\s+HARDCODED_BANK\s*=\s*(null|\[[\s\S]*?\]);/,
+        `let HARDCODED_BANK = ${bankJsonString};`
+      );
+
+      // 创建下载链接并触发下载
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(blob);
+      downloadLink.download = 'index.html';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      showToast(`已成功下载刻录了 ${questionBank.length} 道题目的 index.html！`);
+    }
+
+    /**
+     * ============================================================
+     * 答题流程控制
+     * ============================================================
+     */
+    function startQuiz() {
+      currentIndex = 0;
+      userAnswers = {};
+      wrongQuestionIds = [];
+      showView(document.getElementById('viewQuiz'));
+      document.getElementById('quizProgressBar').classList.remove('hidden');
+      renderSingleQuestion();
+    }
+
+    function resetAllQuiz() {
+      currentIndex = 0;
+      userAnswers = {};
+      wrongQuestionIds = [];
+      startQuiz();
+    }
+
+    function showView(target) {
+      ['viewHome', 'viewQuiz', 'viewResult'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      target.classList.remove('hidden');
+      target.classList.remove('page-slide-enter');
+      void target.offsetWidth;
+      target.classList.add('page-slide-enter');
+    }
+
+    function renderSingleQuestion() {
+      const q = questionBank[currentIndex];
+      const total = questionBank.length;
+
+      const progressPercent = ((currentIndex + 1) / total) * 100;
+      document.getElementById('progressFill').style.width = `${progressPercent}%`;
+      document.getElementById('questionStepText').textContent = `第 ${currentIndex + 1} / ${total} 题`;
+      document.getElementById('cardNavNumber').textContent = `${currentIndex + 1}/${total}`;
+
+      const typeBadge = document.getElementById('questionTypeBadge');
+      if (q.type === 'multiple') {
+        typeBadge.textContent = '多选题';
+        typeBadge.className = 'bg-purple-100 text-purple-700 font-bold text-[11px] px-2.5 py-0.5 rounded-full';
+      } else if (q.type === 'judge') {
+        typeBadge.textContent = '判断题';
+        typeBadge.className = 'bg-amber-100 text-amber-700 font-bold text-[11px] px-2.5 py-0.5 rounded-full';
+      } else {
+        typeBadge.textContent = '单选题';
+        typeBadge.className = 'bg-blue-100 text-blue-700 font-bold text-[11px] px-2.5 py-0.5 rounded-full';
+      }
+
+      document.getElementById('prevQuestionBtn').classList.toggle('invisible', currentIndex === 0);
+      document.getElementById('nextBtnText').textContent = (currentIndex === total - 1) ? '完成测评查看最终成绩' : '进入下一题';
+      document.getElementById('questionTitle').textContent = q.question;
+
+      const existingAnswer = userAnswers[q.id];
+      if (existingAnswer && existingAnswer.submitted) {
+        isSubmittedCurrent = true;
+        renderSubmittedState(q, existingAnswer.value);
+      } else {
+        isSubmittedCurrent = false;
+        document.getElementById('instantStatusBadge').classList.add('hidden');
+        document.getElementById('instantAnalysisBox').classList.add('hidden');
+        document.getElementById('submitAnswerBtn').classList.remove('hidden');
+        document.getElementById('nextQuestionBtn').classList.add('hidden');
+
+        renderActiveOptions(q, existingAnswer ? existingAnswer.value : null);
+      }
+    }
+
+    function renderActiveOptions(q, currentVal) {
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+      const selected = currentVal || (q.type === 'multiple' ? [] : '');
+
+      q.options.forEach(opt => {
+        const isSelected = q.type === 'multiple' ? selected.includes(opt.key) : selected === opt.key;
+        const optBtn = document.createElement('button');
+        optBtn.className = `w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium ${
+          isSelected ? 'bg-blue-50 border-blue-600 text-blue-900 shadow-sm' : 'bg-white border-slate-200/90 text-slate-700 hover:border-slate-300'
+        }`;
+        optBtn.dataset.key = opt.key;
+        optBtn.innerHTML = `
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+              isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
+            }">${opt.key}</span>
+            <span class="opt-text leading-snug">${opt.text}</span>
+          </div>
+          <div class="opt-icon-status shrink-0 text-base">
+            ${isSelected ? '<i class="fa-solid fa-circle-check text-blue-600"></i>' : '<i class="fa-regular fa-circle text-slate-300"></i>'}
+          </div>
+        `;
+        optBtn.addEventListener('click', () => handleOptionClick(opt.key));
+        container.appendChild(optBtn);
+      });
+    }
+
+    function handleOptionClick(key) {
+      if (isSubmittedCurrent) return;
+      const q = questionBank[currentIndex];
+      let currentVal = userAnswers[q.id] ? userAnswers[q.id].value : (q.type === 'multiple' ? [] : '');
+
+      if (q.type === 'multiple') {
+        let arr = Array.isArray(currentVal) ? [...currentVal] : [];
+        if (arr.includes(key)) {
+          arr = arr.filter(k => k !== key);
+        } else {
+          arr.push(key);
+          arr.sort();
+        }
+        userAnswers[q.id] = { value: arr, submitted: false };
+      } else {
+        userAnswers[q.id] = { value: key, submitted: false };
+      }
+      refreshOptionStyles();
+    }
+
+    function refreshOptionStyles() {
+      const q = questionBank[currentIndex];
+      const entry = userAnswers[q.id];
+      const selected = entry ? entry.value : (q.type === 'multiple' ? [] : '');
+
+      Array.from(document.getElementById('optionsContainer').children).forEach(btn => {
+        const k = btn.dataset.key;
+        const isSelected = q.type === 'multiple' ? selected.includes(k) : selected === k;
+        const keyBadge = btn.querySelector('.opt-key-badge');
+        const iconContainer = btn.querySelector('.opt-icon-status');
+
+        if (isSelected) {
+          btn.className = "w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-blue-50 border-blue-600 text-blue-900 shadow-sm";
+          keyBadge.className = "opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-blue-600 text-white";
+          iconContainer.innerHTML = '<i class="fa-solid fa-circle-check text-blue-600"></i>';
+        } else {
+          btn.className = "w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between text-xs md:text-sm font-medium bg-white border-slate-200/90 text-slate-700 hover:border-slate-300";
+          keyBadge.className = "opt-key-badge w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors bg-slate-100 text-slate-600";
+          iconContainer.innerHTML = '<i class="fa-regular fa-circle text-slate-300"></i>';
+        }
+      });
+    }
+
+    function submitCurrentAnswer() {
+      const q = questionBank[currentIndex];
+      const entry = userAnswers[q.id];
+
+      if (!entry || !entry.value || (Array.isArray(entry.value) && entry.value.length === 0)) {
+        showToast('请先选择答案再点击提交');
+        const c = document.getElementById('optionsContainer');
+        c.classList.add('shake-anim');
+        setTimeout(() => c.classList.remove('shake-anim'), 350);
+        return;
+      }
+
+      userAnswers[q.id].submitted = true;
+      isSubmittedCurrent = true;
+      renderSubmittedState(q, entry.value);
+    }
+
+    function renderSubmittedState(q, rawUserVal) {
+      const stdAns = String(q.answer).trim().toUpperCase();
+      const userAnsStr = Array.isArray(rawUserVal) ? rawUserVal.join('') : String(rawUserVal).trim().toUpperCase();
+      const isCorrect = (userAnsStr === stdAns);
+
+      const statusBadge = document.getElementById('instantStatusBadge');
+      statusBadge.classList.remove('hidden');
+      if (isCorrect) {
+        statusBadge.textContent = '回答正确';
+        statusBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+      } else {
+        statusBadge.textContent = '回答错误';
+        statusBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800';
+        if (!wrongQuestionIds.includes(q.id)) wrongQuestionIds.push(q.id);
+      }
+
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+      q.options.forEach(opt => {
+        const isStandard = stdAns.includes(opt.key);
+        const isUserPick = userAnsStr.includes(opt.key);
+
+        const btn = document.createElement('div');
+        let cardClass = "";
+        let badgeClass = "";
+        let iconHtml = "";
+
+        if (isStandard) {
+          cardClass = "bg-emerald-50 border-2 border-emerald-500 text-emerald-950 font-semibold shadow-sm";
+          badgeClass = "bg-emerald-600 text-white";
+          iconHtml = '<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>';
+        } else if (isUserPick && !isStandard) {
+          cardClass = "bg-rose-50 border-2 border-rose-400 text-rose-950 font-semibold";
+          badgeClass = "bg-rose-500 text-white";
+          iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-500 text-lg"></i>';
+        } else {
+          cardClass = "opacity-50 bg-slate-50 border border-slate-200 text-slate-400";
+          badgeClass = "bg-slate-200 text-slate-500";
+          iconHtml = '';
+        }
+
+        btn.className = `w-full text-left p-3.5 rounded-2xl transition-all flex items-center justify-between text-xs md:text-sm ${cardClass}`;
+        btn.innerHTML = `
+          <div class="flex items-center space-x-3 pr-2">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${badgeClass}">${opt.key}</span>
+            <span class="leading-snug">${opt.text}</span>
+          </div>
+          <div class="shrink-0">${iconHtml}</div>
+        `;
+        container.appendChild(btn);
+      });
+
+      document.getElementById('correctAnswerKey').textContent = stdAns;
+      document.getElementById('analysisContent').textContent = q.analysis || '暂无深度解析。';
+      document.getElementById('instantAnalysisBox').classList.remove('hidden');
+
+      document.getElementById('submitAnswerBtn').classList.add('hidden');
+      const nextBtn = document.getElementById('nextQuestionBtn');
+      nextBtn.classList.remove('hidden');
+      nextBtn.classList.add('flex');
+    }
+
+    function gotoNextQuestion() {
+      if (currentIndex < questionBank.length - 1) {
+        currentIndex++;
+        renderSingleQuestion();
+      } else {
+        renderResultView();
+      }
+    }
+
+    function gotoPrevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderSingleQuestion();
+      }
+    }
+
+    function openSheetModal() {
+      const container = document.getElementById('modalDotsContainer');
+      container.innerHTML = '';
+      questionBank.forEach((q, idx) => {
+        const item = userAnswers[q.id];
+        let colorClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
+
+        if (item && item.submitted) {
+          const stdAns = String(q.answer).trim().toUpperCase();
+          const userStr = Array.isArray(item.value) ? item.value.join('') : String(item.value).trim().toUpperCase();
+          colorClass = (userStr === stdAns) 
+            ? "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300"
+            : "bg-rose-100 text-rose-800 font-bold border border-rose-300";
+        } else if (item && item.value && (!Array.isArray(item.value) || item.value.length > 0)) {
+          colorClass = "bg-blue-100 text-blue-800 border border-blue-300";
+        }
+
+        const dot = document.createElement('button');
+        dot.className = `h-9 rounded-xl flex items-center justify-center text-xs transition active:scale-95 ${colorClass} ${
+          idx === currentIndex ? 'ring-2 ring-blue-600 ring-offset-1' : ''
+        }`;
+        dot.textContent = `${idx + 1}`;
+        dot.addEventListener('click', () => {
+          currentIndex = idx;
+          closeSheetModal();
+          renderSingleQuestion();
+        });
+        container.appendChild(dot);
+      });
+
+      document.getElementById('sheetModal').classList.remove('hidden');
+    }
+
+    function closeSheetModal() {
+      document.getElementById('sheetModal').classList.add('hidden');
+    }
+
+    function renderResultView() {
+      document.getElementById('quizProgressBar').classList.add('hidden');
+      showView(document.getElementById('viewResult'));
+
+      const total = questionBank.length;
+      let correctCount = 0;
+
+      questionBank.forEach(q => {
+        const item = userAnswers[q.id];
+        if (item && item.submitted) {
+          const stdAns = String(q.answer).trim().toUpperCase();
+          const userStr = Array.isArray(item.value) ? item.value.join('') : String(item.value).trim().toUpperCase();
+          if (userStr === stdAns) correctCount++;
+        }
+      });
+
+      const wrongCount = total - correctCount;
+      const score = Math.round((correctCount / total) * 100);
+
+      document.getElementById('finalScoreText').textContent = score;
+      document.getElementById('statTotalCount').textContent = total;
+      document.getElementById('statCorrectCount').textContent = correctCount;
+      document.getElementById('statWrongCount').textContent = wrongCount;
+
+      const dotsBox = document.getElementById('answerSheetDots');
+      dotsBox.innerHTML = '';
+      questionBank.forEach((q, idx) => {
+        const item = userAnswers[q.id];
+        let isRight = false;
+        if (item && item.submitted) {
+          const stdAns = String(q.answer).trim().toUpperCase();
+          const userStr = Array.isArray(item.value) ? item.value.join('') : String(item.value).trim().toUpperCase();
+          isRight = (userStr === stdAns);
+        }
+
+        const dot = document.createElement('button');
+        dot.className = `h-8 rounded-lg flex items-center justify-center text-[11px] font-bold transition active:scale-95 ${
+          isRight ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'
+        }`;
+        dot.textContent = `${idx + 1}`;
+        dot.addEventListener('click', () => {
+          currentIndex = idx;
+          showView(document.getElementById('viewQuiz'));
+          document.getElementById('quizProgressBar').classList.remove('hidden');
+          renderSingleQuestion();
+        });
+        dotsBox.appendChild(dot);
+      });
+
+      const retryBtn = document.getElementById('retryWrongOnlyBtn');
+      if (wrongCount > 0) {
+        retryBtn.classList.remove('hidden');
+        document.getElementById('wrongCountLabel').textContent = wrongCount;
+      } else {
+        retryBtn.classList.add('hidden');
+      }
+    }
+
+    function startWrongPractice() {
+      if (wrongQuestionIds.length === 0) return;
+      questionBank = questionBank.filter(q => wrongQuestionIds.includes(q.id));
+      currentIndex = 0;
+      userAnswers = {};
+      wrongQuestionIds = [];
+      updateAllCounters();
+      startQuiz();
+      showToast(`已开启错题专练，共 ${questionBank.length} 题！`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2500);
+    }
+  </script>
+
+</body></html>
